@@ -50,7 +50,7 @@ class Board(object):
         """
         Load and init level data
         """
-        self.size = [int(n) for n in level['size'].split('.')]
+        self.size = level['size']
         self.rect = pygame.Rect(screen_rect.topleft, (32 * self.size[0], 32 * self.size[1]))
 
         additional = {}
@@ -80,6 +80,9 @@ class Board(object):
                             getattr(self, 'sprites_'+group).add(sprite)
                         except AttributeError:
                             pass
+
+        if 'screws' in level:
+            game.status.parts = level['screws']
 
     def move_sprite(self, sprite, step):
         """Przesuwa sprite o dany krok"""

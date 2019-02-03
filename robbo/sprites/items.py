@@ -36,9 +36,11 @@ class Capsule(BlinkingSprite):
     
     def __init__(self, pos):
         super(Capsule, self).__init__(pos)
+        self.active = False
         game.capsule = self
 
     def activate(self):
+        self.active = True
         self.UPDATE_TIME = self.update_time = 3
 
 

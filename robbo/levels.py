@@ -31,6 +31,9 @@ def load_levels(filename=os.path.join('levels', 'original.dat')):
                     level[section] = data.rstrip()
                 data = ''
                 if s == 'end':
+                    level['size'] = tuple(int(n) for n in level['size'].split('.'))
+                    if 'screws' in level:
+                        level['screws'] = int(level['screws'])
                     game.levels.append(level)
                     level = {}
                     section = None

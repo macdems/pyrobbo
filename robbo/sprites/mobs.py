@@ -47,7 +47,7 @@ class Bird(Mob):
     IMAGES = images.BIRD1, images.BIRD2
 
     def __init__(self, pos, direction=0, shooting_dir=0, shooting=0):
-        super(Bird, self).__init__(pos, NORTH if direction else EAST)
+        super(Bird, self).__init__(pos, SOUTH if direction else EAST)
         self.shooting = shooting
         self.shooting_dir = shooting_dir
 

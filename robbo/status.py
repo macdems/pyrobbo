@@ -17,14 +17,11 @@ from . import screen, background
 
 
 class Status(object):
-    """Klasa zawiera informacje o stanie posiadania naszego Robbo
-       (ilość żyć, brakujące śrubki, ilość kluczy itp.)
-       Ponadto klasa uaktualnia dane na dole ekranu"""
+    """
+    Status data and display
+    """
     def __init__(self, level):
-        self.keys = 0
-        self.parts = 0
         self.level = level
-        self.bullets = 0
         self.digits = game.images.get_digits()
         # Wczytujemy obrazki
         self.images = {
@@ -38,6 +35,12 @@ class Status(object):
         screen.blit(self.images['keys'], pygame.Rect(224,self.top, 32,32))
         screen.blit(self.images['bullets'], pygame.Rect(352,self.top, 32,32))
         screen.blit(self.images['level'], pygame.Rect(476,self.top, 32,32))
+        self.clear()
+
+    def clear(self):
+        self.keys = 0
+        self.parts = 0
+        self.bullets = 0
 
     def printnum(self, num, pos, dig):
         for i in range(dig-1,-1,-1):

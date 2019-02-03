@@ -10,7 +10,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
+import sys
 import pygame
 
 pygame.init()
@@ -19,6 +19,7 @@ pygame.display.set_caption('PyRobbo')
 pygame.key.set_repeat(0, 0)
 
 clock = pygame.time.Clock()
+clock_speed = 8
 
 screen = pygame.display.set_mode((640, 480))
 background = pygame.Surface(screen.get_size())
@@ -32,8 +33,13 @@ from .defs import *
 from .levels import load_levels
 
 
+try:
+    start = int(sys.argv[1])
+except (IndexError, ValueError):
+    start = 0
+
+
 def main():
     load_levels()
-    game.play_level(7)
-
-    print(clock.get_fps())
+    for level in range(start, len(game.levels)):
+        game.play_level(level)
