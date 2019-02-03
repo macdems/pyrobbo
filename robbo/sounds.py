@@ -15,9 +15,17 @@ from io import BytesIO
 import pygame
 
 with ZipFile("sounds.dat", 'r') as zipf:
-    screw = pygame.mixer.Sound(BytesIO(zipf.read("screw.wav")))
-    lastscrew = pygame.mixer.Sound(BytesIO(zipf.read("lastscrew.wav")))
-    push = pygame.mixer.Sound(BytesIO(zipf.read("push.wav")))
+    blaster = pygame.mixer.Sound(BytesIO(zipf.read("blaster.wav")))
+    bomb = pygame.mixer.Sound(BytesIO(zipf.read("bomb.wav")))
+    bullet = pygame.mixer.Sound(BytesIO(zipf.read("bullet.wav")))
+    die = pygame.mixer.Sound(BytesIO(zipf.read("die.wav")))
     door = pygame.mixer.Sound(BytesIO(zipf.read("door.wav")))
+    finish = pygame.mixer.Sound(BytesIO(zipf.read("finish.wav")))
     key = pygame.mixer.Sound(BytesIO(zipf.read("key.wav")))
+    lastscrew = pygame.mixer.Sound(BytesIO(zipf.read("lastscrew.wav")))
+    life = pygame.mixer.Sound(BytesIO(zipf.read("life.wav")))
+    push = pygame.mixer.Sound(BytesIO(zipf.read("push.wav")))
+    screw = pygame.mixer.Sound(BytesIO(zipf.read("screw.wav")))
+    shoot = pygame.mixer.Sound(BytesIO(zipf.read("shoot.wav")))
     teleport = pygame.mixer.Sound(BytesIO(zipf.read("teleport.wav")))
+    wallshoot = pygame.mixer.Sound(BytesIO(zipf.read("wallshoot.wav")))

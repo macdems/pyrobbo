@@ -25,5 +25,38 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
 
 
+class BlinkingSprite(Sprite):
+    """
+    Sprite with multiple images
+    """
+    GROUPS = 'update',
+    IMAGES = None
+
+    UPDATE_TIME = 1  # update frequency
+
+    def __init__(self, pos):
+        super(BlinkingSprite, self).__init__(pos)
+        if self.IMAGES is not None:
+            self._images = tuple(game.images.get_icon(icon) for icon in self.IMAGES)
+            self._imageno = 0
+            self.image = self._images[0]
+            self.update_time = self.UPDATE_TIME
+
+    def update(self):
+        """
+        Update image state
+
+        Return value can be used by subclasses to do their own update.
+        """
+        if self.UPDATE_TIME:
+            self.update_time -= 1
+            if not self.update_time:
+                self.update_time = self.UPDATE_TIME
+                self._imageno = (self._imageno + 1) % len(self.IMAGES)
+                self.image = self._images[self._imageno]
+                return True
+            return False
+
+
 # Register all sprites
-from . import static,  items, teleport, robbo
+from . import static,  items, mobs, teleport, robbo

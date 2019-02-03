@@ -35,3 +35,9 @@ class Void(Sprite):
     """Black vvoid"""
     IMAGE = images.VOID
     GROUPS = 'static',
+
+
+@Board.sprite('H')
+class Grass(Sprite):
+    IMAGE = images.GRASS
+    GROUPS = 'static', 'shoot'

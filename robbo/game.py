@@ -11,7 +11,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import pygame
-from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, KMOD_CTRL, KEYUP
+from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, KMOD_SHIFT, KMOD_CTRL, \
+    KEYUP, K_PLUS, K_EQUALS, K_MINUS
 
 from .defs import *
 
@@ -20,6 +21,7 @@ images = None
 status = None
 board = None
 robbo = None
+capsule = None
 
 
 from . import screen, background, screen_rect, clock
@@ -31,10 +33,18 @@ from .status import Status
 from . import sprites
 
 
-def play(level):
+def update_sprites():
+    # Cleanup old stuff
+    screen.blit(background, robbo.rect, robbo.rect)
+    for sprite in board.sprites_update.sprites():
+        screen.blit(background, sprite.rect, sprite.rect)
+    board.sprites_update.update()
+
+
+def play_level(level):
     """The game loop"""
     pygame.mouse.set_visible(0)
-    clock_speed = 8
+    clock_speed = 10
 
     background.fill((64,64,128), screen_rect)
     screen.blit(background,screen.get_rect())
@@ -42,106 +52,113 @@ def play(level):
     # Init global game objects
     global images, status, board
     images = Images()
-    status = Status()
-    board = Board()
+    status = Status(level)
 
+    board = Board()
     board.init(levels[level-1])
     status.update()
 
-    scrolling = 0       # czy przesuwamy ekran
-    scrolldir = 0       # kierunek przesuwania ekranu
+    scrolling = 0       # are we scrolling?
+    scrolldir = 0       # scrolling direction
 
     # Inicjujemy ekran gry
     screen.set_clip(screen_rect)
 
-    # Rysujemy elementy statyczne
+    # Draw static sprites
     board.sprites.draw(screen)
 
-    global robbosprite
-    robbosprite = pygame.sprite.RenderPlain(robbo)
-
-    # Zmienne pomocnicze
-    updatesprites = board.sprites_update
+    # Init updatable sprites
+    sprites_robbo = pygame.sprite.RenderPlain(robbo)
 
     while 1:
+        # Check if robbo died and, if so, recreate board
+        if not robbo.alive():
+            # Wait
+            for _ in range(6):
+                update_sprites()
+                clock.tick(clock_speed)
+            # Cleanup bord
+            #TODO kill sprites nicely
+            for sprite in board.sprites:
+                screen.blit(background, sprite.rect, sprite.rect)
+                sprite.kill()
+            # Recreate board
+            offset = board.scroll_offset[1]
+            board = Board()
+            board.init(levels[level-1])
+            status.update()
+            for sprite in board.sprites.sprites():
+                sprite.rect.move_ip(0, offset)
+            board.scroll_offset = [0, offset]
+            board.rect.move_ip(0, offset)
+            board.sprites.draw(screen)
+            board.sprites.draw(screen)
+            sprites_robbo.add(robbo)
 
-        # Obsługa zdarzeń użytkownika
+        # Process user events
         for event in pygame.event.get():
-            # wyjście z programu
             if event.type == QUIT:
                 return
-            # naciśnięcie klawisza
             elif event.type == KEYDOWN:
-                # Ruchy naszego robocika
+                # Robbo moves
                 if event.key == K_UP:
-                    robbo.moveKey(NORTH)
+                    robbo.move_key(NORTH)
                 elif event.key == K_DOWN:
-                    robbo.moveKey(SOUTH)
+                    robbo.move_key(SOUTH)
                 elif event.key == K_LEFT:
-                    robbo.moveKey(WEST)
+                    robbo.move_key(WEST)
                 elif event.key == K_RIGHT:
-                    robbo.moveKey(EAST)
-                # Klawisze systemowe
+                    robbo.move_key(EAST)
+                # system keys
                 elif event.key == K_f:
                      pygame.display.toggle_fullscreen()
-                elif event.key == K_q:
-                    if pygame.key.get_mods() & KMOD_CTRL: return
+                elif event.key == K_PLUS or (event.key == K_EQUALS and pygame.key.get_mods() & KMOD_SHIFT):
+                    clock_speed *= 1.2
+                elif event.key == K_MINUS:
+                    clock_speed /= 1.2
+                elif event.key == K_x and pygame.key.get_mods() & KMOD_CTRL:
+                    robbo.die()
+                elif event.key == K_q and pygame.key.get_mods() & KMOD_CTRL:
+                    return
             elif event.type == KEYUP:
                 if event.key == K_UP:
-                    if robbo.walking == NORTH: robbo.moveKey(STOP)
+                    if robbo.walking == NORTH: robbo.move_key(STOP)
                 elif event.key == K_DOWN:
-                    if robbo.walking == SOUTH: robbo.moveKey(STOP)
+                    if robbo.walking == SOUTH: robbo.move_key(STOP)
                 elif event.key == K_LEFT:
-                    if robbo.walking == WEST: robbo.moveKey(STOP)
+                    if robbo.walking == WEST: robbo.move_key(STOP)
                 elif event.key == K_RIGHT:
-                    if robbo.walking == EAST: robbo.moveKey(STOP)
-                # Klawisze systemowe
+                    if robbo.walking == EAST: robbo.move_key(STOP)
         pygame.event.pump()
 
-        # Sprawdzanie, czy nie trzeba przescrollować
+        # Check if scrolling is needed
         if robbo.rect.top < screen_rect.top+64 and board.scroll_offset[1] < 0:
             scrolling = 3; scrolldir = SCROLL_UP
         elif robbo.rect.bottom > screen_rect.bottom-64 and board.rect.bottom > screen_rect.height+32:
             scrolling = 3; scrolldir = SCROLL_DOWN
         elif scrolling:
-            if board.scroll_offset[1] < 0 and \
-               board.rect.bottom > screen_rect.height+32:
+            if board.scroll_offset[1] < 0 and board.rect.bottom > screen_rect.height+32:
                 scrolling -= 1
             else:
                 scrolling = 0
 
-        # Czyszczenie starych rzeczy
-        screen.blit(background, robbo.rect, robbo.rect)
-        for item in updatesprites.sprites():
-            screen.blit(background, item.rect, item.rect)
+        update_sprites()
+        sprites_robbo.update()
 
-        # Uaktualnianie spritów ruszających się
-        robbosprite.update()
-        board.sprites_update.update()
-
-        # Przewijanie
         if scrolling:
             for n in range(4):
-                for item in board.sprites.sprites():
-                    screen.blit(background, item.rect, item.rect)
-                    item.rect.move_ip(0,scrolldir)
-                board.scroll_offset[1] += scrolldir    # ustalamy offset planszy
+                for sprite in board.sprites.sprites():
+                    screen.blit(background, sprite.rect, sprite.rect)
+                    sprite.rect.move_ip(0, scrolldir)
+                board.scroll_offset[1] += scrolldir    # decide current offset
                 board.rect.move_ip(0, scrolldir)
                 board.sprites.draw(screen)
                 pygame.display.flip()
                 clock.tick(clock_speed*4)
         else:
-
-            # Rysujemy sprity poruszające się
-            #board.dynamicsprites.draw(screen)
-            robbosprite.draw(screen)
-            updatesprites.draw(screen)
-
-            # Gotowe - pokazujemy obraz
+            # Draw moving sprites
+            sprites_robbo.draw(screen)
+            board.sprites_update.draw(screen)
             pygame.display.flip()
-
-            # Ustalamy prędkość gry (8 ramek na sekundę)
             clock.tick(clock_speed)
-    #[pętla gry]
-
 

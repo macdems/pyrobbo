@@ -13,26 +13,37 @@
 
 from .. import game, images, sounds
 from ..board import Board
-from . import Sprite
+from . import Sprite, BlinkingSprite
 
 
 @Board.sprite('#')
 class Box(Sprite):
-    """Klasa zawierająca przesuwaną skrzynkę"""
     IMAGE = images.BOX
     GROUPS = 'push',
 
 
 @Board.sprite('b')
 class Bomb(Sprite):
-    """Klasa zawierająca bombę"""
     IMAGE = images.BOMB
-    GROUPS = 'push',
+    GROUPS = 'push', 'shoot'
+
+
+@Board.sprite('!')
+class Capsule(BlinkingSprite):
+    IMAGES = images.CAPSULE1, images.CAPSULE2
+    UPDATE_TIME = 0
+    GROUPS = 'push', 'update'
+    
+    def __init__(self, pos):
+        super(Capsule, self).__init__(pos)
+        game.capsule = self
+
+    def activate(self):
+        self.UPDATE_TIME = self.update_time = 3
 
 
 @Board.sprite('T')
 class Screw(Sprite):
-    """Klasa zawierająca śrubkę"""
     IMAGE = images.SCREW
     GROUPS = 'collect',
 
@@ -49,31 +60,38 @@ class Screw(Sprite):
         sounds.screw.play()
         if game.status.parts == 0:
             sounds.lastscrew.play()
+            if game.capsule is not None:
+                game.capsule.activate()
+
+
+@Board.sprite("'")
+class Bullet(Sprite):
+    IMAGE = images.BULLET
+    GROUPS = 'collect',
+
+    def collect(self):
+        game.status.bullets += 10
+        game.status.update()
+        sounds.bullet.play()
 
 
 @Board.sprite('%')
 class Key(Sprite):
-    """Klasa zawierająca klucz do drzwi"""
     IMAGE = images.KEY
     GROUPS = 'collect',
 
     def collect(self):
-        """Funkcja wywoływana przy zebraniu klucza"""
         game.status.keys += 1
         game.status.update()
-        # Gramy dźwięk
         sounds.key.play()
 
 
 @Board.sprite('D')
 class Door(Sprite):
-    """Klasa zawierająca drzwi"""
     IMAGE = images.DOOR
     GROUPS = 'door',
 
     def open(self):
-        """Funkcja wywoływana przy użyciu klucza"""
         game.status.keys -= 1
         game.status.update()
-        # Gramy dźwięk
         sounds.door.play()

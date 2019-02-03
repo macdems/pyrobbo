@@ -23,20 +23,18 @@ class Board(object):
     Holds all static and moving sprites.
     """
 
-    fields = {}
+    symbols = {}
 
     class sprite(object):
+        """Sprite decorator for automatic symbol registering"""
         def __init__(self, symbols):
             self.symbols = symbols
         def __call__(self, cls):
             for symbol in self.symbols:
-                Board.fields[symbol] = cls
+                Board.symbols[symbol] = cls
             return cls
 
     def __init__(self):
-        """Inicjuje planszę i rozmieszcza sprity"""
-
-        # Przygotowujemy miejsce na sprity i elementy
         self.sprites = pygame.sprite.RenderPlain()          # all sprites
         self.sprites_static = pygame.sprite.Group()         # walls
         self.sprites_update = pygame.sprite.RenderPlain()   # elements that move or blink
@@ -44,15 +42,14 @@ class Board(object):
         self.sprites_collect = pygame.sprite.Group()        # collectibles
         self.sprites_door = pygame.sprite.Group()           # doors (can be open with keys)
         self.sprites_teleport = pygame.sprite.Group()       # teleports
-
-        # Teleporty
+        self.sprites_mob = pygame.sprite.Group()            # mobs
         self.teleports = []
-
-        # Przesunięcie obszaru gry
         self.scroll_offset = [0, 0]
 
     def init(self, level):
-        # Tutaj inicjujemy obszar.
+        """
+        Load and init level data
+        """
         self.size = [int(n) for n in level['size'].split('.')]
         self.rect = pygame.Rect(screen_rect.topleft, (32 * self.size[0], 32 * self.size[1]))
 
@@ -74,7 +71,7 @@ class Board(object):
             for x, c in enumerate(row):
                 p = x, y
                 data = additional.get(c, {}).get(p, ())
-                Sprite = self.fields.get(c)
+                Sprite = self.symbols.get(c)
                 if Sprite is not None:
                     sprite = Sprite(p, *data)
                     self.sprites.add(sprite)
@@ -84,58 +81,27 @@ class Board(object):
                         except AttributeError:
                             pass
 
-    def movesprite(self, sprite, step):
+    def move_sprite(self, sprite, step):
         """Przesuwa sprite o dany krok"""
         screen.blit(background, sprite.rect, sprite.rect)
         sprite.rect.move_ip(step)
         screen.blit(sprite.image, sprite.rect)
 
-    def canmove(self, rect, step):
-        """Sprawdza czy da się przejść na daną pozycję
-           jednocześnie przesuwa obiekty popychane i teleportuje Robbo"""
-        global screen, background
+    def can_move(self, rect, *groups):
+        """Check if a sprite can be moved to rect and does not collide with any sprite from the group"""
 
-        # Czy nie wypadamy za krawędzie
+        # Check we we exit the game area
         if not self.rect.contains(rect):
-            return 0
-        # Czy nie blokuje nas coś nieruchomego
-        if rectcollide(rect, self.sprites_static):
-            return 0
-        # Czy coś może popchniemy
-        thelist = rectcollide(rect, self.sprites_push)
-        if thelist:
-            if rectcollide(rect.move(step), self.sprites): return 0
-            else:
-                for sprite in thelist:
-                    self.movesprite(sprite, step)
-                sounds.push.play()
-                return 1
-        # Czy coś bierzemy
-        thelist = rectcollide(rect, self.sprites_collect)
-        if thelist:
-            for item in thelist:
-                item.collect()
-                screen.blit(background, item.rect, item.rect)
-                item.kill()
-            return 1
-        # Czy trafiliśmy na drzwi
-        thelist = rectcollide(rect, self.sprites_door)
-        if thelist:
-            if game.status.keys > 0:
-                for door in thelist:
-                    door.open()
-                    screen.blit(background, door.rect, door.rect)
-                    door.kill()
-                return 0
-            else:
-                return 0
-        # Do we teleport?
-        thelist = rectcollide(rect, self.sprites_teleport)
-        if thelist:
-            thelist[0].teleport(step)
-            return 0
+            return False
 
-        return 1
+        # Check if any sprite from the group blocks us
+        if groups:
+            for group in groups:
+                if rectcollide(rect, getattr(self, 'sprites_'+group)):
+                    return False
+            return True
+        else:
+            return not rectcollide(rect, self.sprites)
 
 
 def rectcollide(rect, group, dokill=0):

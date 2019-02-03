@@ -33,12 +33,12 @@
  l  Vertical Laser    | direction (only 1=south & 3=north)
  M  Magnet            | direction (all 4 directions)
  =  Force Field       | direction (only 0=east and 2=west)
- +  Extra Life        | Exists in some converted level packs but GNU Robbo does not support this object anymore.
+ +  Extra Life        | Exists in some converted level packs but GNU Robbo does no    t support this object anymore.
  X  Stop              | Millenium object.
  k  Radioactive Field | Millenium object.
  B  Bomb2             | Alex object: explodes and then shoots in all directions.
  ,  Special character | You can produce strange effects with this object, in theory you should be able to create any object with it
-		      | the arguments are: type,state,direction,destroyable,blowable,killing,movable,shooted
+		              | the arguments are: type,state,direction,destroyable,blowable,killing,movable,shooted
  a  Metal Wall        | Well, it looks metal to me
 
 
@@ -239,7 +239,7 @@ OOOOOOOOOOOOOOOO
 0.3.}.0.0.0.0.0.0
 8.25.}.2.2.1.0.0.0
 3.13.@.2
-5.20.^.0.0.0
+4.20.^.1.0.0
 [end]
 
 
@@ -424,9 +424,9 @@ QQ&QQQ&QQQ&QQQQQ
 -----Q...Q...Q--
 QQQQQQ.b.&.H.&--
 Q&...Q...Q...Q--
-Q....QQQQQQQQQQQ
-Q..?.Q...D.....Q
-Q....D..}Q.QQQ.Q
+QQQQDQQQQQQQQQQQ
+Q.......^D.....Q
+Q........Q.QQQ.Q
 QQQQQQQQQQ.QQQ.Q
 Q........#.....Q
 Q..!...^..#....Q
@@ -464,7 +464,6 @@ QQQQHHQQQQ#QQQQQ
 1.11.&.7.1
 10.4.&.8.0
 3.6.&.8.1
-8.14.}.2.2.1.0.0
 [end]
 
 

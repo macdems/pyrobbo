@@ -34,6 +34,6 @@ from .levels import load_levels
 
 def main():
     load_levels()
-    game.play(6)
+    game.play_level(7)
 
     print(clock.get_fps())

@@ -16,35 +16,23 @@ import pygame
 from .. import game, screen, background, screen_rect, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
-from . import Sprite
+from . import BlinkingSprite
 
 
 @Board.sprite('&')
-class Teleport(Sprite):
-    """Klasa zawierająca teleport"""
+class Teleport(BlinkingSprite):
+    """
+    Teleport sprite
+    """
+    IMAGES = images.TELEPORT1, images.TELEPORT2
     GROUPS = 'teleport', 'update'
-
-    UPDATE_TIME = 3  # update frequency
+    UPDATE_TIME = 3
 
     def __init__(self, pos, group, no):
-        """Inicjuje sprite i dodaje do listy w board"""
         super(Teleport, self).__init__(pos)
-        self.images = (game.images.get_icon(images.TELEPORT1), game.images.get_icon(images.TELEPORT2))
-        self._cur_image = 0
-        self.image = self.images[0]
-        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
-        self._toupdate = self.UPDATE_TIME    # Czas do zmiany obrazka
-        self.group = group-1                # Grupa teleportów
-        self.no = no                        # Numer teleportu
+        self.group = group-1
+        self.no = no
         game.board.teleports[self.group][no] = self
-
-    def update(self):
-        """Funkcja uaktualnia stan teleportu (czyli zmienia obrazek)"""
-        self._toupdate -= 1
-        if not self._toupdate:
-            self._toupdate = self.UPDATE_TIME
-            self._cur_image = 1 - self._cur_image
-            self.image = self.images[self._cur_image]
 
     def teleport(self, step):
         """Move Robbo to the target teleport"""
@@ -63,51 +51,51 @@ class Teleport(Sprite):
                 if game.board.rect.contains(new) and not rectcollide(new, game.board.sprites):
                     moved = 1
                     break
-                direct = (direct + 1) % 4
+                direct = (direct - 1) % 4
             if moved: break
-        # Tworzymy gwiazdki znikające
+
+        # Create disappear stars
         if moved:
             stars = Stars(game.robbo.rect)
             game.board.sprites.add(stars)
             game.board.sprites_update.add(stars)
-        # Albo ustalamy, że Robbo się pojawia w tym samym miejscu
+        # Or make Robbo reappear in the same place
         else:
             step = [0,0]
             dest = game.robbo
-        # Przenosimy obrazek
+
+        # Move Robbo
         screen.blit(background, game.robbo.rect, game.robbo.rect)
         game.robbo.rect = dest.rect.move(step)
 
-        # Ustalamy gwiazdki pojawiania się
-        game.robbo.stopimages = game.robbo.teleportimages
-        game.robbo.stop = 6
-        game.robbo.image = game.robbo.stopimages[6]
+        # Make appear stars
+        game.robbo.spawn()
 
-        # Gramy dźwięk
+        # Play sound
         sounds.teleport.play()
 
 
 class Stars(pygame.sprite.Sprite):
-    """Klasa gwiazdki gdy się robbo teleportuje"""
+    """
+    Teleport and die stars
+    """
     GROUPS = 'update',
+    UPDATE_TIME = 1
 
     def __init__(self, pos):
-        """Inicjuje sprite i dodaje do listy w board"""
-
         super(Stars, self).__init__()
-
         self.images = (
-            game.images.get_icon(images.STARS3), game.images.get_icon(images.STARS3),
-            game.images.get_icon(images.STARS2), game.images.get_icon(images.STARS2),
-            game.images.get_icon(images.STARS1), game.images.get_icon(images.STARS1))
+            game.images.get_icon(images.STARS3),
+            game.images.get_icon(images.STARS2),
+            game.images.get_icon(images.STARS1))
         self.rect = pos
-        self._todie = 6
-        self.image = self.images[self._todie - 1]
+        self._todie = len(self.images) * self.UPDATE_TIME
+        self.image = self.images[-1]
 
     def update(self):
-        """Funkcja wywoływana cyklicznie"""
         self._todie -= 1
-        if self._todie:
-            self.image = self.images[self._todie]
-        else:
-            self.kill()
+        if self._todie % self.UPDATE_TIME == 0:
+            if self._todie:
+                self.image = self.images[self._todie//self.UPDATE_TIME-1]
+            else:
+                self.kill()

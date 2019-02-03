@@ -12,13 +12,13 @@
 # GNU General Public License for more details.
 
 # Directions
-NORTH = 0
-EAST = 1
-SOUTH = 2
-WEST = 3
+NORTH = 3
+EAST = 0
+SOUTH = 1
+WEST = 2
 
 # Robbo steps
-STEPS = [(0, -32), (32, 0), (0, 32), (-32, 0)]
+STEPS = (32, 0), (0, 32), (-32, 0), (0, -32)
 STOP = -1
 
 # Scroll steps
