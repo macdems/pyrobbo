@@ -22,7 +22,7 @@ board = None
 robbo = None
 
 
-from . import screen, background, area, clock
+from . import screen, background, screen_rect, clock
 from .board import Board
 from .images import Images
 from .status import Status
@@ -30,12 +30,13 @@ from .status import Status
 # Register all sprites — do not remove the line below
 from . import sprites
 
+
 def play(level):
     """The game loop"""
     pygame.mouse.set_visible(0)
     clock_speed = 8
 
-    background.fill((64,64,128), area)
+    background.fill((64,64,128), screen_rect)
     screen.blit(background,screen.get_rect())
 
     # Init global game objects
@@ -51,7 +52,7 @@ def play(level):
     scrolldir = 0       # kierunek przesuwania ekranu
 
     # Inicjujemy ekran gry
-    screen.set_clip(area)
+    screen.set_clip(screen_rect)
 
     # Rysujemy elementy statyczne
     board.sprites.draw(screen)
@@ -98,13 +99,13 @@ def play(level):
         pygame.event.pump()
 
         # Sprawdzanie, czy nie trzeba przescrollować
-        if robbo.rect.top < area.top+64 and board.scroll_offset[1] < 0:
+        if robbo.rect.top < screen_rect.top+64 and board.scroll_offset[1] < 0:
             scrolling = 3; scrolldir = SCROLL_UP
-        elif robbo.rect.bottom > area.bottom-64 and board.rect.bottom > area.height+32:
+        elif robbo.rect.bottom > screen_rect.bottom-64 and board.rect.bottom > screen_rect.height+32:
             scrolling = 3; scrolldir = SCROLL_DOWN
         elif scrolling:
             if board.scroll_offset[1] < 0 and \
-               board.rect.bottom > area.height+32:
+               board.rect.bottom > screen_rect.height+32:
                 scrolling -= 1
             else:
                 scrolling = 0

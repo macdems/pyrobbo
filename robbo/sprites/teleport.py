@@ -10,10 +10,10 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+from warnings import warn
 import pygame
 
-
-from .. import game, screen, background, area, images, sounds
+from .. import game, screen, background, screen_rect, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
 from . import Sprite
@@ -32,7 +32,7 @@ class Teleport(Sprite):
         self.images = (game.images.get_icon(images.TELEPORT1), game.images.get_icon(images.TELEPORT2))
         self._cur_image = 0
         self.image = self.images[0]
-        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(area.topleft)
+        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
         self._toupdate = self.UPDATE_TIME    # Czas do zmiany obrazka
         self.group = group-1                # Grupa teleportów
         self.no = no                        # Numer teleportu
@@ -47,29 +47,23 @@ class Teleport(Sprite):
             self.image = self.images[self._cur_image]
 
     def teleport(self, step):
-        """Funkcja przenosi robocika do teleportu docelowego"""
+        """Move Robbo to the target teleport"""
 
-        # Ustalamy kierunek w jakim możemy teleportować
+        # Check possible destination
+        direct = STEPS.index(step)
         moved = 0
-        destination = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]
-        for dest in destination, self:
+        target = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]
+        for dest in target, self:
             if dest is None:
-                print(self.group+1, self.no)
-                for i,g in enumerate(game.board.teleports):
-                    print(i + 1, end=': ')
-                    for t in g:
-                        if t is None: print(t, end=' ')
-                        else: print(t.group+1, t.no, sep='/', end=' ')
-                    print()
+                warn('Target does not exist. This is probably an error in the level file.')
                 continue
             for n in range(4):
-                if not rectcollide(dest.rect.move(step), game.board.sprites):
+                step = STEPS[direct]
+                new = dest.rect.move(step)
+                if game.board.rect.contains(new) and not rectcollide(new, game.board.sprites):
                     moved = 1
                     break
-                if step == STEPS[NORTH]: step = STEPS[EAST]
-                elif step == STEPS[EAST]: step = STEPS[SOUTH]
-                elif step == STEPS[SOUTH]: step = STEPS[WEST]
-                elif step == STEPS[WEST]: step = STEPS[NORTH]
+                direct = (direct + 1) % 4
             if moved: break
         # Tworzymy gwiazdki znikające
         if moved:

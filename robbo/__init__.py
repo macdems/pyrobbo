@@ -24,7 +24,7 @@ screen = pygame.display.set_mode((640, 480))
 background = pygame.Surface(screen.get_size())
 background = background.convert()
 
-area = pygame.Rect((64, 32), (512, 384))
+screen_rect = pygame.Rect((64, 32), (512, 384))
 
 
 from . import game

@@ -18,7 +18,7 @@ SOUTH = 2
 WEST = 3
 
 # Robbo steps
-STEPS = {NORTH: (0, -32), EAST: (32, 0), SOUTH: (0, 32), WEST: (-32, 0)}
+STEPS = [(0, -32), (32, 0), (0, 32), (-32, 0)]
 STOP = -1
 
 # Scroll steps

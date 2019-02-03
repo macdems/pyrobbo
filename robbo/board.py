@@ -13,7 +13,7 @@
 import pygame
 
 from . import sounds
-from . import game, area, background, screen
+from . import game, screen_rect, background, screen
 
 
 class Board(object):
@@ -54,7 +54,7 @@ class Board(object):
     def init(self, level):
         # Tutaj inicjujemy obszar.
         self.size = [int(n) for n in level['size'].split('.')]
-        self.rect = pygame.Rect(area.topleft, (32*self.size[0], 32*self.size[1]))
+        self.rect = pygame.Rect(screen_rect.topleft, (32 * self.size[0], 32 * self.size[1]))
 
         additional = {}
 
@@ -129,7 +129,7 @@ class Board(object):
                 return 0
             else:
                 return 0
-        # Czy się teleportujemy
+        # Do we teleport?
         thelist = rectcollide(rect, self.sprites_teleport)
         if thelist:
             thelist[0].teleport(step)
@@ -139,7 +139,7 @@ class Board(object):
 
 
 def rectcollide(rect, group, dokill=0):
-    """Funkcja sprawdza czy dany kwadrat koliduje z grupą spritów"""
+    """Check if specified rectangle collides with a group of sprites"""
     crashed = []
     spritecollide = rect.colliderect
     if dokill:

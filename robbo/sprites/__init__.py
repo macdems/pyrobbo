@@ -12,7 +12,7 @@
 # GNU General Public License for more details.
 import pygame
 
-from .. import game, area
+from .. import game, screen_rect
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -22,7 +22,7 @@ class Sprite(pygame.sprite.Sprite):
         super(Sprite, self).__init__()
         if self.IMAGE is not None:
             self.image = game.images.get_icon(self.IMAGE)
-        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(area.topleft)
+        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
 
 
 # Register all sprites

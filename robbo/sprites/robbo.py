@@ -12,7 +12,7 @@
 # GNU General Public License for more details.
 import pygame
 
-from .. import game, screen, background, area, images, sounds
+from .. import game, screen, background, screen_rect, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
 
@@ -43,10 +43,10 @@ class Robbo(pygame.sprite.Sprite):
 
         # Ustalamy pozycję
         self.pos = pos
-        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(area.topleft)
+        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
 
         # Na początek stoimy
-        self.movepos = [0,0]
+        self.movepos = [0, 0]
         self.walking = STOP
 
         # Czy nie możemy się ruszać przez ileś rund
