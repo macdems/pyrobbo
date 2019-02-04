@@ -13,8 +13,8 @@
 import sys
 
 import pygame
-from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, KMOD_SHIFT, KMOD_CTRL, \
-    KEYUP, K_PLUS, K_EQUALS, K_MINUS
+from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, \
+    KEYUP, K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_LCTRL, KMOD_RCTRL
 
 from .defs import *
 
@@ -25,14 +25,14 @@ board = None
 robbo = None
 capsule = None
 
-from . import screen, background, screen_rect, clock, clock_speed, sounds
+from . import screen, screen_rect, clock, clock_speed, sounds
 from .board import Board
 from .images import Images
 from .status import Status
 
 # Register all sprites — do not remove the line below
-from . import sprites
-
+from .sprites import explode
+from .sprites.items import Bomb
 
 class EndLevel(Exception):
     """
@@ -43,9 +43,9 @@ class EndLevel(Exception):
 
 def update_sprites():
     # Cleanup old stuff
-    screen.blit(background, robbo.rect, robbo.rect)
+    screen.blit(board.background, robbo.rect, robbo.rect)
     for sprite in board.sprites_update.sprites():
-        screen.blit(background, sprite.rect, sprite.rect)
+        screen.blit(board.background, sprite.rect, sprite.rect)
     board.sprites_update.update()
 
 
@@ -53,27 +53,21 @@ def play_level(level):
     """The game loop"""
     pygame.mouse.set_visible(0)
 
-    color = bytes.fromhex(levels[level].get('colour', '404080'))
-
-    background.fill(color, screen_rect)
-    screen.blit(background,screen.get_rect())
-
     global clock_speed
 
     # Init global game objects
     global images, status, board
     images = Images()
-    status = Status(level)
 
+    status = Status(level)
     board = Board()
+
+    screen.set_clip(screen_rect)
     board.init(levels[level])
     status.update()
 
     scrolling = 0       # are we scrolling?
     scrolldir = 0       # scrolling direction
-
-    # Inicjujemy ekran gry
-    screen.set_clip(screen_rect)
 
     # Draw static sprites
     board.sprites.draw(screen)
@@ -88,15 +82,23 @@ def play_level(level):
             for _ in range(6):
                 update_sprites()
                 clock.tick(clock_speed)
-            # Cleanup bord
-            #TODO kill sprites nicely
+            # Cleanup board
+            sounds.die.play()
             for sprite in board.sprites:
-                screen.blit(background, sprite.rect, sprite.rect)
-                sprite.kill()
+                explode(sprite)
+            while board.sprites:
+                update_sprites()
+                board.sprites_update.draw(screen)
+                pygame.display.flip()
+                clock.tick(clock_speed)
+            # Wait
+            for _ in range(6):
+                update_sprites()
+                clock.tick(clock_speed)
             # Recreate board
             offset = board.scroll_offset[1]
             status.clear()
-            board.init(levels[level-1])
+            board.init(levels[level])
             status.update()
             for sprite in board.sprites.sprites():
                 sprite.rect.move_ip(0, offset)
@@ -106,30 +108,46 @@ def play_level(level):
             board.sprites.draw(screen)
             sprites_robbo.add(robbo)
 
+        # Test for chained bombs and trigger them
+        Bomb.chain()
+
         # Process user events
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit(0)
             elif event.type == KEYDOWN:
                 # Robbo moves
+                mods = pygame.key.get_mods()
                 if event.key == K_UP:
-                    robbo.move_key(NORTH)
+                    if mods & KMOD_SHIFT:
+                        robbo.fire(NORTH)
+                    else:
+                        robbo.move_key(NORTH)
                 elif event.key == K_DOWN:
-                    robbo.move_key(SOUTH)
+                    if mods & KMOD_SHIFT:
+                        robbo.fire(SOUTH)
+                    else:
+                        robbo.move_key(SOUTH)
                 elif event.key == K_LEFT:
-                    robbo.move_key(WEST)
+                    if mods & KMOD_SHIFT:
+                        robbo.fire(WEST)
+                    else:
+                        robbo.move_key(WEST)
                 elif event.key == K_RIGHT:
-                    robbo.move_key(EAST)
+                    if mods & KMOD_SHIFT:
+                        robbo.fire(EAST)
+                    else:
+                        robbo.move_key(EAST)
                 # system keys
                 elif event.key == K_f:
                      pygame.display.toggle_fullscreen()
-                elif event.key == K_PLUS or (event.key == K_EQUALS and pygame.key.get_mods() & KMOD_SHIFT):
+                elif event.key == K_PLUS or event.key == K_EQUALS:
                     clock_speed *= 1.2
                 elif event.key == K_MINUS:
                     clock_speed /= 1.2
-                elif event.key == K_x and pygame.key.get_mods() & KMOD_CTRL:
+                elif event.key == K_x and mods in (KMOD_LCTRL, KMOD_RCTRL):
                     robbo.die()
-                elif event.key == K_q and pygame.key.get_mods() & KMOD_CTRL:
+                elif event.key == K_q and mods in (KMOD_LCTRL, KMOD_RCTRL):
                     sys.exit(0)
             elif event.type == KEYUP:
                 if event.key == K_UP:
@@ -173,7 +191,7 @@ def play_level(level):
         if scrolling:
             for n in range(4):
                 for sprite in board.sprites.sprites():
-                    screen.blit(background, sprite.rect, sprite.rect)
+                    screen.blit(board.background, sprite.rect, sprite.rect)
                     sprite.rect.move_ip(0, scrolldir)
                 board.scroll_offset[1] += scrolldir    # decide current offset
                 board.rect.move_ip(0, scrolldir)

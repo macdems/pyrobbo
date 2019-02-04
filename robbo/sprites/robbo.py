@@ -12,11 +12,12 @@
 # GNU General Public License for more details.
 import pygame
 
-from .. import game, screen, background, screen_rect, images, sounds
+from .. import game, screen, screen_rect, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
 
-from .teleport import Stars
+from . import Stars
+from .guns import fire_blast
 
 @Board.sprite('R')
 class Robbo(pygame.sprite.Sprite):
@@ -33,10 +34,10 @@ class Robbo(pygame.sprite.Sprite):
             SOUTH: (game.images.get_icon(images.ROBBO_S1), game.images.get_icon(images.ROBBO_S2)),
             WEST: (game.images.get_icon(images.ROBBO_W1), game.images.get_icon(images.ROBBO_W2))
         }
-        self.cur_image = 0
-        self.image = self.images[SOUTH][self.cur_image]
+        self._ci = 0
+        self.image = self.images[SOUTH][self._ci]
 
-        # Teleport and die images
+        # Teleport and die _images
         self.spawn_images = (
             game.images.get_icon(images.ROBBO_S1),
             game.images.get_icon(images.STARS1), game.images.get_icon(images.STARS1),
@@ -91,7 +92,7 @@ class Robbo(pygame.sprite.Sprite):
                 if collected:
                     for item in collected:
                         item.collect()
-                        screen.blit(background, item.rect, item.rect)
+                        screen.blit(game.board.background, item.rect, item.rect)
                         item.kill()
 
                 # Do we open the door?
@@ -100,7 +101,7 @@ class Robbo(pygame.sprite.Sprite):
                 if doors:
                     for door in doors:
                         door.open()
-                        screen.blit(background, door.rect, door.rect)
+                        screen.blit(game.board.background, door.rect, door.rect)
                         door.kill()
                     move = False
 
@@ -115,8 +116,8 @@ class Robbo(pygame.sprite.Sprite):
 
             # Update image if Robbo is walking
             if self.walking != STOP and not self._spawning:
-                self.cur_image = 1 - self.cur_image
-                self.image = self.images[self.walking][self.cur_image]
+                self._ci = 1 - self._ci
+                self.image = self.images[self.walking][self._ci]
 
             # Check if we are killed by the mobs
             for step in ((0,0),) + STEPS:
@@ -131,6 +132,12 @@ class Robbo(pygame.sprite.Sprite):
             self.step = STEPS[direct]
         else:
             self.step = (0, 0)
+
+    def fire(self, dir):
+        if game.status.bullets > 0:
+            fire_blast(self, dir)
+            game.status.bullets -= 1
+            game.status.update()
 
     def die(self):
         if self.alive():
@@ -149,6 +156,9 @@ class DeadRobbo(Stars):
     walking = None
 
     def move_key(self, direct):
+        pass
+
+    def fire(self, dir):
         pass
 
     def die(self):

@@ -11,9 +11,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-from .. import game, images, sounds
-from ..board import Board
-from . import Sprite, BlinkingSprite
+from .. import game, screen, images, sounds
+from ..board import Board, rectcollide
+from . import Sprite, BlinkingSprite, explode
 
 
 @Board.sprite('#')
@@ -25,7 +25,29 @@ class Box(Sprite):
 @Board.sprite('b')
 class Bomb(Sprite):
     IMAGE = images.BOMB
-    GROUPS = 'push', 'shoot'
+    GROUPS = 'push', 'hit'
+
+    _chain = []
+
+    def hit(self):
+        sounds.bomb.play()
+        rect = self.rect.inflate(64, 64)
+        explode(self)
+        hits = rectcollide(rect, game.board.sprites)
+        for hit in hits:
+            if hit is game.robbo:
+                game.robbo.die()
+            elif isinstance(hit, Bomb):
+                self._chain.append(hit)
+            elif game.board.sprites_durable not in hit.groups():
+                explode(hit)
+
+    @staticmethod
+    def chain():
+        chain = Bomb._chain
+        Bomb._chain = []
+        for bomb in chain:
+            bomb.hit()
 
 
 @Board.sprite('!')

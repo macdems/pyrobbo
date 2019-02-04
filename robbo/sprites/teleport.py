@@ -11,12 +11,11 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 from warnings import warn
-import pygame
 
-from .. import game, screen, background, screen_rect, images, sounds
+from .. import game, screen, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
-from . import BlinkingSprite
+from . import BlinkingSprite, Stars
 
 
 @Board.sprite('&')
@@ -65,7 +64,7 @@ class Teleport(BlinkingSprite):
             dest = game.robbo
 
         # Move Robbo
-        screen.blit(background, game.robbo.rect, game.robbo.rect)
+        screen.blit(game.board.background, game.robbo.rect, game.robbo.rect)
         game.robbo.rect = dest.rect.move(step)
 
         # Make appear stars
@@ -75,27 +74,3 @@ class Teleport(BlinkingSprite):
         sounds.teleport.play()
 
 
-class Stars(pygame.sprite.Sprite):
-    """
-    Teleport and die stars
-    """
-    GROUPS = 'update',
-    UPDATE_TIME = 1
-
-    def __init__(self, pos):
-        super(Stars, self).__init__()
-        self.images = (
-            game.images.get_icon(images.STARS3),
-            game.images.get_icon(images.STARS2),
-            game.images.get_icon(images.STARS1))
-        self.rect = pos
-        self._todie = len(self.images) * self.UPDATE_TIME
-        self.image = self.images[-1]
-
-    def update(self):
-        self._todie -= 1
-        if self._todie % self.UPDATE_TIME == 0:
-            if self._todie:
-                self.image = self.images[self._todie//self.UPDATE_TIME-1]
-            else:
-                self.kill()

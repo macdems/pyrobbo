@@ -12,22 +12,22 @@
 # GNU General Public License for more details.
 import pygame
 
-from .. import game, screen, background, screen_rect, images, sounds
+from .. import game, screen, screen_rect, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
 from . import BlinkingSprite
 
 
 class Mob(BlinkingSprite):
-    GROUPS = 'mob', 'update'
+    GROUPS = 'mob', 'update', 'hit'
     UPDATE_TIME = 3
 
-    def __init__(self, pos, direction=0):
+    def __init__(self, pos, dir=0):
         super(Mob, self).__init__(pos)
-        self.direction = direction
+        self.dir = dir
 
     def try_move(self):
-        step = STEPS[self.direction]
+        step = STEPS[self.dir]
         newrect = self.rect.move(step)
         if game.board.can_move(newrect):
             self.rect = newrect
@@ -46,14 +46,14 @@ class Mob(BlinkingSprite):
 class Bird(Mob):
     IMAGES = images.BIRD1, images.BIRD2
 
-    def __init__(self, pos, direction=0, shooting_dir=0, shooting=0):
-        super(Bird, self).__init__(pos, SOUTH if direction else EAST)
+    def __init__(self, pos, dir=0, shooting_dir=0, shooting=0):
+        super(Bird, self).__init__(pos, SOUTH if dir else WEST)
         self.shooting = shooting
         self.shooting_dir = shooting_dir
 
     def move(self):
         if not self.try_move():
-            self.direction = (self.direction + 2) % 4
+            self.dir = (self.dir + 2) % 4
             self.try_move()
 
 
@@ -62,10 +62,10 @@ class Bear(Mob):
     IMAGES = images.BEAR1, images.BEAR2
 
     def move(self):
-        self.direction = (self.direction - 1) % 4
+        self.dir = (self.dir - 1) % 4
         for _ in range(4):
             if self.try_move(): break
-            self.direction = (self.direction + 1) % 4
+            self.dir = (self.dir + 1) % 4
 
 
 @Board.sprite('*')
@@ -73,7 +73,7 @@ class Devil(Mob):
     IMAGES = images.DEVIL1, images.DEVIL2
 
     def move(self):
-        self.direction = (self.direction + 1) % 4
+        self.dir = (self.dir + 1) % 4
         for _ in range(4):
             if self.try_move(): break
-            self.direction = (self.direction - 1) % 4
+            self.dir = (self.dir - 1) % 4

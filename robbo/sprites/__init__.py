@@ -12,7 +12,7 @@
 # GNU General Public License for more details.
 import pygame
 
-from .. import game, screen_rect
+from .. import game, screen, screen_rect, images
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -27,7 +27,7 @@ class Sprite(pygame.sprite.Sprite):
 
 class BlinkingSprite(Sprite):
     """
-    Sprite with multiple images
+    Sprite with multiple _images
     """
     GROUPS = 'update',
     IMAGES = None
@@ -58,5 +58,39 @@ class BlinkingSprite(Sprite):
             return False
 
 
+class Stars(pygame.sprite.Sprite):
+    """
+    Teleport and die stars
+    """
+    GROUPS = 'update', 'durable'
+    UPDATE_TIME = 1
+
+    def __init__(self, pos):
+        super(Stars, self).__init__()
+        self._images = (
+            game.images.get_icon(images.STARS3),
+            game.images.get_icon(images.STARS2),
+            game.images.get_icon(images.STARS1))
+        self.rect = pos
+        self._todie = len(self._images) * self.UPDATE_TIME
+        self.image = self._images[-1]
+
+    def update(self):
+        self._todie -= 1
+        if self._todie % self.UPDATE_TIME == 0:
+            if self._todie:
+                self.image = self._images[self._todie // self.UPDATE_TIME - 1]
+            else:
+                self.kill()
+
+
+def explode(target):
+    target.kill()
+    screen.blit(game.board.background, target.rect, target.rect)
+    stars = Stars(target.rect)
+    game.board.sprites.add(stars)
+    game.board.sprites_update.add(stars)
+
+
 # Register all sprites
-from . import static,  items, mobs, teleport, robbo
+from . import static,  items, mobs, teleport, robbo, guns

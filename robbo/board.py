@@ -12,8 +12,7 @@
 # GNU General Public License for more details.
 import pygame
 
-from . import sounds
-from . import game, screen_rect, background, screen
+from . import game, screen_rect, screen
 
 
 class Board(object):
@@ -43,8 +42,13 @@ class Board(object):
         self.sprites_door = pygame.sprite.Group()           # doors (can be open with keys)
         self.sprites_teleport = pygame.sprite.Group()       # teleports
         self.sprites_mob = pygame.sprite.Group()            # mobs
+        self.sprites_durable = pygame.sprite.Group()        # durable sprite
+        self.sprites_hit = pygame.sprite.Group()            # destroyed on hit
         self.teleports = []
         self.scroll_offset = [0, 0]
+        self.background = pygame.Surface(screen.get_size())
+        self.background = self.background.convert()
+
 
     def init(self, level):
         """
@@ -52,6 +56,10 @@ class Board(object):
         """
         self.size = level['size']
         self.rect = pygame.Rect(screen_rect.topleft, (32 * self.size[0], 32 * self.size[1]))
+
+        color = bytes.fromhex(level.get('colour', '404080'))
+        self.background.fill(color)
+        screen.blit(self.background, screen_rect)
 
         additional = {}
 
@@ -86,7 +94,7 @@ class Board(object):
 
     def move_sprite(self, sprite, step):
         """Przesuwa sprite o dany krok"""
-        screen.blit(background, sprite.rect, sprite.rect)
+        screen.blit(game.board.background, sprite.rect, sprite.rect)
         sprite.rect.move_ip(step)
         screen.blit(sprite.image, sprite.rect)
 
@@ -107,17 +115,16 @@ class Board(object):
             return not rectcollide(rect, self.sprites)
 
 
-def rectcollide(rect, group, dokill=0):
-    """Check if specified rectangle collides with a group of sprites"""
+def rectcollide(rect, group):
+    """
+    Check if specified rectangle collides with a group of sprites
+
+    :param rect: Rect to test
+    :param group: sprite group to test
+    """
     crashed = []
     spritecollide = rect.colliderect
-    if dokill:
-        for s in group.sprites():
-            if spritecollide(s.rect):
-                s.kill()
-                crashed.append(s)
-    else:
-        for s in group.sprites():
-            if spritecollide(s.rect):
-                crashed.append(s)
+    for s in group.sprites():
+        if spritecollide(s.rect):
+            crashed.append(s)
     return crashed

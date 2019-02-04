@@ -22,8 +22,6 @@ clock = pygame.time.Clock()
 clock_speed = 8
 
 screen = pygame.display.set_mode((640, 480))
-background = pygame.Surface(screen.get_size())
-background = background.convert()
 
 screen_rect = pygame.Rect((64, 32), (512, 384))
 

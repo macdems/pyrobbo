@@ -12,14 +12,18 @@
 # GNU General Public License for more details.
 import pygame
 
-from . import game, images
-from . import screen, background
+from . import screen, game, images
 
 
 class Status(object):
     """
     Status data and display
     """
+
+    BACKGROUND = pygame.Surface((16, 32))
+    BACKGROUND = BACKGROUND.convert()
+    BACKGROUND.fill((0,0,0))
+
     def __init__(self, level):
         self.level = level
         self.digits = game.images.get_digits()
@@ -47,7 +51,7 @@ class Status(object):
             n = num % 10
             num = num // 10
             rect = pygame.Rect(pos, (16,32)).move((i*16,0))
-            screen.blit(background, rect, rect)
+            screen.blit(self.BACKGROUND, rect, rect)
             screen.blit(self.digits[n], rect)
 
     def update(self):

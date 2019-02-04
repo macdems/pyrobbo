@@ -20,24 +20,24 @@ from . import Sprite
 class GreyWall(Sprite):
     """Grey wall"""
     IMAGE = images.WALL_GRAY
-    GROUPS = 'static',
+    GROUPS = 'static', 'durable'
 
 
 @Board.sprite('qQpPsS')
 class RedWall(Sprite):
     """Red wall"""
     IMAGE = images.WALL_RED
-    GROUPS = 'static',
+    GROUPS = 'static', 'durable'
 
 
 @Board.sprite('-')
 class Void(Sprite):
-    """Black vvoid"""
+    """Black void"""
     IMAGE = images.VOID
-    GROUPS = 'static',
+    GROUPS = 'static', 'durable'
 
 
 @Board.sprite('H')
 class Grass(Sprite):
     IMAGE = images.GRASS
-    GROUPS = 'static', 'shoot'
+    GROUPS = 'static', 'hit'
