@@ -159,14 +159,24 @@ class Surprise(Sprite):
                 if self._todie:
                     self.image = self._images[self._todie // self.UPDATE_TIME - 1]
                 else:
-                    choice = random.choice((None, SlideBox, Screw, Bullet, Key, Bomb, Grass, Gun, Surprise#, Butterfly
-                                            ))
+                    choice = random.choice((
+                        None,
+                        SlideBox,
+                        Screw,
+                        Bullet,
+                        Key,
+                        Bomb,
+                        Grass,
+                        Gun,
+                        Surprise,
+                        #Butterfly,
+                        #Life,
+                    ))
                     self.kill()
                     if choice is not None:
                         pos = self.rect.left // 32 - 2, self.rect.top // 32 - 1
                         sprite = choice(pos)
                         game.board.add_sprite(sprite)
-                        print(sprite)
                         if isinstance(sprite, Screw):
                             game.status.parts -= 1  # screw constructor increased this
                         elif isinstance(sprite, Capsule):

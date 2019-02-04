@@ -44,22 +44,20 @@ class ShortBlast(pygame.sprite.Sprite):
     GROUPS = 'blast',
     UPDATE_TIME = 1
 
-    def __init__(self, rect, dir):
+    def __init__(self, rect, dir, icon=None):
         super(ShortBlast, self).__init__()
         self.dir = dir
-        if dir == EAST or dir == WEST:
-            self._images = (
-                game.images.get_icon(images.BLAST_H1),
-                game.images.get_icon(images.BLAST_H2)
-            )
+        if icon is None:
+            if dir == EAST or dir == WEST:
+                self._images = game.images.get_icon(images.BLAST_H1), game.images.get_icon(images.BLAST_H2)
+            else:
+                self._images = game.images.get_icon(images.BLAST_V1), game.images.get_icon(images.BLAST_V2)
+            self._ci = 0
+            self.image = self._images[0]
         else:
-            self._images = (
-                game.images.get_icon(images.BLAST_V1),
-                game.images.get_icon(images.BLAST_V2)
-            )
+            self._images = None
+            self.image = game.images.get_icon(icon)
         self.rect = rect
-        self._ci = 0
-        self.image = self._images[0]
 
     def update(self):
         newrect = self.rect.move(STEPS[self.dir])
@@ -67,17 +65,60 @@ class ShortBlast(pygame.sprite.Sprite):
             self.kill()
             return
         self.rect = newrect
-        self._ci = 1 - self._ci
-        self.image = self._images[self._ci]
+        if self._images is not None:
+            self._ci = 1 - self._ci
+            self.image = self._images[self._ci]
 
 
-def fire_blast(source, dir):
-    sounds.shoot.play()
+def fire_blast(source, dir, icon=None):
     rect = source.rect.move(STEPS[dir])
     if game.board.rect.contains(rect) and not hit(rect):
-        blast = ShortBlast(rect, dir)
+        blast = ShortBlast(rect, dir, icon)
         game.board.add_sprite(blast)
 
+
+class LongBlast(pygame.sprite.Sprite):
+    """
+    Short blast shot by Robbo and guns
+    """
+    GROUPS = 'blast',
+
+    def __init__(self, rect, dir, prev):
+        super(LongBlast, self).__init__()
+        self.dir = dir
+        if dir == EAST or dir == WEST:
+            self._images = game.images.get_icon(images.BLAST_H1), game.images.get_icon(images.BLAST_H2)
+        else:
+            self._images = game.images.get_icon(images.BLAST_V1), game.images.get_icon(images.BLAST_V2)
+        if isinstance(prev, LongBlast):
+            self.ci = prev.ci
+        else:
+            self.ci = 0
+        self.image = self._images[0]
+        self.rect = rect
+        self._prev = prev
+        self._head = True
+
+    def update(self):
+        self.ci = 1 - self.ci
+        self.image = self._images[self.ci]
+        if self._head:
+            self._head = False
+            game.board.sprites_static.add(self)     # Robbo cannot enter
+            newrect = self.rect.move(STEPS[self.dir])
+            if not game.board.rect.contains(newrect) or hit(newrect):
+                game.chain.append(self)
+            else:
+                next = LongBlast(newrect, self.dir, self)
+                game.board.add_sprite(next)
+
+    def chain(self):
+        self.kill()
+        screen.blit(game.board.background, self.rect, self.rect)
+        if isinstance(self._prev, LongBlast):
+            game.chain.append(self._prev)
+        elif isinstance(self._prev, Gun):
+            self._prev.blasting = False
 
 @Board.sprite('}')
 class Gun(Sprite):
@@ -85,19 +126,51 @@ class Gun(Sprite):
     IMAGES = images.GUN_E, images.GUN_S, images.GUN_W, images.GUN_N
 
     SHOOT_FREQUENCY = 12
+    ROTATE_FREQUENCY = 12
 
-    def __init__(self, pos, facing=None, moving=0, shot_type=0, moves=0, rotates=0, random_rotates=0):
+    BIG_BLAST_ICONS = images.STARS3, images.STARS2, images.STARS1, images.STARS2, images.STARS3
+
+    def __init__(self, pos, facing=None, moving=0, shot_type=0, moves=0, rotates=0, rotates_random=0):
         if facing is None:
             facing = random.randrange(4)
             rotates = 1
-            random_rotates = 1
-            shot_type = 2
+            rotates_random = 1
+            shot_type = 0
         self.IMAGE = self.IMAGES[facing]
         super(Gun, self).__init__(pos)
         self.facing = facing
         self.shot_type = shot_type
-        #TODO: all proper gun types
+        self.rotates_random = rotates_random
+        self.rotates = rotates
+        self._to_rotate = self.ROTATE_FREQUENCY
+        #TODO: moving gun
+        self.blasting = False
 
     def update(self):
-        if random.randrange(self.SHOOT_FREQUENCY) == 0:
+        if self.rotates and not self.blasting:
+            if self.rotates_random:
+                self._to_rotate = random.randrange(self.ROTATE_FREQUENCY)
+            else:
+                self._to_rotate -= 1
+            if self._to_rotate == 0:
+                self._to_rotate = self.ROTATE_FREQUENCY
+                twist = -1
+                if self.rotates_random and random.randrange(2): twist = 1
+                self.facing = (self.facing + twist) % 4
+                self.image = game.images.get_icon(self.IMAGES[self.facing])
+        if self.shot_type == 2:
+            if self.blasting:
+                fire_blast(self, self.facing, self.BIG_BLAST_ICONS[self.blasting])
+                self.blasting -= 1
+            else:
+                if random.randrange(self.SHOOT_FREQUENCY) == 0:
+                    fire_blast(self, self.facing, self.BIG_BLAST_ICONS[-1])
+                    self.blasting = len(self.BIG_BLAST_ICONS) - 1
+        if self.shot_type == 1:
+            if not self.blasting and random.randrange(self.SHOOT_FREQUENCY) == 0:
+                rect = self.rect.move(STEPS[self.facing])
+                if game.board.rect.contains(rect) and not hit(rect):
+                    game.board.add_sprite(LongBlast(rect, self.facing, self))
+                    self.blasting = True
+        elif random.randrange(self.SHOOT_FREQUENCY) == 0:
             fire_blast(self, self.facing)

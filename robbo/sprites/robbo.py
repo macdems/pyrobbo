@@ -137,6 +137,7 @@ class Robbo(pygame.sprite.Sprite):
 
     def fire(self, dir):
         if game.status.bullets > 0:
+            sounds.shoot.play()
             fire_blast(self, dir)
             game.status.bullets -= 1
             game.status.update()
