@@ -14,7 +14,7 @@ import sys
 
 import pygame
 from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, \
-    KEYUP, K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_LCTRL, KMOD_RCTRL
+    KEYUP, K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META
 
 from .defs import *
 
@@ -145,9 +145,9 @@ def play_level(level):
                     clock_speed *= 1.2
                 elif event.key == K_MINUS:
                     clock_speed /= 1.2
-                elif event.key == K_x and mods in (KMOD_LCTRL, KMOD_RCTRL):
+                elif event.key == K_x and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
                     robbo.die()
-                elif event.key == K_q and mods in (KMOD_LCTRL, KMOD_RCTRL):
+                elif event.key == K_q and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
                     sys.exit(0)
             elif event.type == KEYUP:
                 if event.key == K_UP:

@@ -73,7 +73,7 @@ class Blast(pygame.sprite.Sprite):
 
 
 def fire_blast(source, dir):
-    sounds.blaster.play()
+    sounds.shoot.play()
     pos = source.rect.move(STEPS[dir])
     if game.board.rect.contains(pos) and not hit(pos):
         blast = Blast(pos, dir)

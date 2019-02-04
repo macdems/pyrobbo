@@ -20,9 +20,9 @@ class Status(object):
     Status data and display
     """
 
-    BACKGROUND = pygame.Surface((16, 32))
-    BACKGROUND = BACKGROUND.convert()
-    BACKGROUND.fill((0,0,0))
+    DIGITBG = pygame.Surface((16, 32))
+    DIGITBG = DIGITBG.convert()
+    DIGITBG.fill((0, 0, 0))
 
     def __init__(self, level):
         self.level = level
@@ -51,11 +51,10 @@ class Status(object):
             n = num % 10
             num = num // 10
             rect = pygame.Rect(pos, (16,32)).move((i*16,0))
-            screen.blit(self.BACKGROUND, rect, rect)
+            screen.blit(self.DIGITBG, rect)
             screen.blit(self.digits[n], rect)
 
     def update(self):
-        """Funkcja uaktualnia dane na dole ekranu"""
         scrclip = screen.get_clip()
         screen.set_clip(screen.get_rect())
         self.printnum(self.parts, (128,self.top), 2)

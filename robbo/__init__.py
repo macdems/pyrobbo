@@ -39,5 +39,9 @@ except (IndexError, ValueError):
 
 def main():
     load_levels()
-    for level in range(start, len(game.levels)):
-        game.play_level(level)
+    try:
+        for level in range(start, len(game.levels)):
+            game.play_level(level)
+    except SystemExit:
+        pygame.quit()
+
