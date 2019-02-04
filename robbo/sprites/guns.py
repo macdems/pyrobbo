@@ -144,6 +144,10 @@ class Gun(Sprite):
         self.rotates = rotates
         self._to_rotate = self.ROTATE_FREQUENCY
         #TODO: moving gun
+        if moves:
+            self.GROUPS = Gun.GROUPS + ('push',)
+        else:
+            self.GROUPS = Gun.GROUPS + ('static',)
         self.blasting = False
 
     def update(self):

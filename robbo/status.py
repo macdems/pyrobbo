@@ -10,6 +10,8 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import sys
+
 import pygame
 
 from . import screen, game, images
@@ -24,6 +26,12 @@ class Status(object):
     DIGITBG = DIGITBG.convert()
     DIGITBG.fill((0, 0, 0))
 
+    Y = 432
+    X_PARTS = 128
+    X_KEYS = 256
+    X_BULLETS = 384
+    X_LEVEL = 512
+
     def __init__(self, level):
         self.level = level
         self.digits = game.images.get_digits()
@@ -34,11 +42,10 @@ class Status(object):
             'bullets': game.images.get_icon(images.S_BULLETS),
             'level': game.images.get_icon(images.S_LEVEL)
         }
-        self.top = 432
-        screen.blit(self.images['parts'], pygame.Rect(96,self.top, 32,32))
-        screen.blit(self.images['keys'], pygame.Rect(224,self.top, 32,32))
-        screen.blit(self.images['bullets'], pygame.Rect(352,self.top, 32,32))
-        screen.blit(self.images['level'], pygame.Rect(476,self.top, 32,32))
+        screen.blit(self.images['parts'], pygame.Rect(self.X_PARTS-32, self.Y, 32, 32))
+        screen.blit(self.images['keys'], pygame.Rect(self.X_KEYS-32, self.Y, 32, 32))
+        screen.blit(self.images['bullets'], pygame.Rect(self.X_BULLETS-32, self.Y, 32, 32))
+        screen.blit(self.images['level'], pygame.Rect(self.X_LEVEL-36, self.Y, 32, 32))
         self.clear()
 
     def clear(self):
@@ -47,18 +54,50 @@ class Status(object):
         self.bullets = 0
 
     def printnum(self, num, pos, dig):
-        for i in range(dig-1,-1,-1):
+        for i in range(dig-1, -1, -1):
             n = num % 10
             num = num // 10
-            rect = pygame.Rect(pos, (16,32)).move((i*16,0))
+            rect = pygame.Rect(pos, (16, 32)).move(i*16, 0)
             screen.blit(self.DIGITBG, rect)
             screen.blit(self.digits[n], rect)
 
     def update(self):
         scrclip = screen.get_clip()
         screen.set_clip(screen.get_rect())
-        self.printnum(self.parts, (128,self.top), 2)
-        self.printnum(self.keys, (256,self.top), 2)
-        self.printnum(self.bullets, (384,self.top), 2)
-        self.printnum(self.level, (512,self.top), 2)
+        self.printnum(self.parts, (self.X_PARTS, self.Y), 2)
+        self.printnum(self.keys, (self.X_KEYS, self.Y), 2)
+        self.printnum(self.bullets, (self.X_BULLETS, self.Y), 2)
+        self.printnum(self.level, (self.X_LEVEL, self.Y), 2)
         screen.set_clip(scrclip)
+
+    def select_level(self):
+        """
+        Manually select level.
+        """
+        screen.set_clip(screen.get_rect())
+        rect = pygame.Rect((self.X_LEVEL, self.Y), (16, 32))
+        screen.blit(self.DIGITBG, rect)
+        screen.blit(self.DIGITBG, rect.move(16, 0))
+        pygame.display.flip()
+
+        digits = []
+
+        # Event loop to enter time
+        while True:
+            event = pygame.event.wait()
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                if pygame.K_0 <= event.key <= pygame.K_9:
+                    n = event.key - pygame.K_0
+                    screen.blit(self.digits[n], rect.move(16 * len(digits), 0))
+                    pygame.display.flip()
+                    digits = [10*i for i in digits]
+                    digits.append(n)
+            pygame.event.pump()
+            if len(digits) == 2:
+                break
+
+        return sum(digits)
+
+

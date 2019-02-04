@@ -10,7 +10,6 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-import sys
 import pygame
 
 pygame.init()
@@ -31,17 +30,17 @@ from .defs import *
 from .levels import load_levels
 
 
-try:
-    start = int(sys.argv[1])
-except (IndexError, ValueError):
-    start = 0
-
-
 def main():
     load_levels()
+    level = 0
     try:
-        for level in range(start, len(game.levels)):
-            game.play_level(level)
+        while level < len(game.levels):
+            try:
+                game.play_level(level)
+            except game.SelectLevel as selected:
+                level = selected.level
+            else:
+                level += 1
     except SystemExit:
         pygame.quit()
 

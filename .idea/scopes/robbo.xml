@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="robbo" pattern="file[pyRobbo]:robbo//*" />
+</component>

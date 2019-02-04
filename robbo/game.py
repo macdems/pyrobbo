@@ -11,9 +11,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import sys
+import os
 
 import pygame
-from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, \
+from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, K_l, \
     KEYUP, K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META
 
 from .defs import *
@@ -34,11 +35,27 @@ from .status import Status
 # Register all sprites — do not remove the line below
 from .sprites import explode
 
+
+try:
+    skin = sys.argv[1]
+except IndexError:
+    skin = 'default'
+else:
+    if not os.path.exists(os.path.join('skins', skin, 'icons.png')) or \
+       not os.path.exists(os.path.join('skins', skin, 'digits.png')):
+        skin = 'default'
+
+
 class EndLevel(Exception):
-    """
-    End level exception
-    """
+    """End level exception"""
     pass
+
+
+class SelectLevel(Exception):
+    """level selected exception"""
+    
+    def __init__(self, level):
+        self.level = level
 
 
 def update_sprites():
@@ -59,7 +76,7 @@ def play_level(level):
 
     # Init global game objects
     global images, status, board
-    images = Images()
+    images = Images(skin)
 
     status = Status(level)
     board = Board()
@@ -77,7 +94,7 @@ def play_level(level):
     # Init updatable sprites
     sprites_robbo = pygame.sprite.RenderPlain(robbo)
 
-    while 1:
+    while True:
         # Check if robbo died and, if so, recreate board
         if not robbo.alive():
             # Wait
@@ -150,6 +167,11 @@ def play_level(level):
                 # system keys
                 elif event.key == K_f:
                      pygame.display.toggle_fullscreen()
+                elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
+                    sprites_robbo.draw(screen)
+                    board.sprites_blast.draw(screen)
+                    board.sprites_update.draw(screen)
+                    raise SelectLevel(status.select_level())
                 elif event.key == K_PLUS or event.key == K_EQUALS:
                     clock_speed *= 1.2
                 elif event.key == K_MINUS:
