@@ -10,12 +10,15 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import random
 import pygame
 
 from .. import game, screen, screen_rect, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
 from . import BlinkingSprite
+
+from .guns import fire_blast
 
 
 class Mob(BlinkingSprite):
@@ -48,6 +51,8 @@ class Mob(BlinkingSprite):
 class Bird(Mob):
     IMAGES = images.BIRD1, images.BIRD2
 
+    SHOOT_FREQUENCY = 6
+
     def __init__(self, pos, dir=0, shooting_dir=0, shooting=0):
         super(Bird, self).__init__(pos, SOUTH if dir else WEST)
         self.shooting = shooting
@@ -57,6 +62,9 @@ class Bird(Mob):
         if not self.try_move():
             self.dir = (self.dir + 2) % 4
             self.try_move()
+        if self.shooting:
+            if random.randrange(self.SHOOT_FREQUENCY) == 0:
+                fire_blast(self, self.shooting_dir)
 
 
 @Board.sprite('@')
