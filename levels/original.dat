@@ -38,7 +38,7 @@
  k  Radioactive Field | Millenium object.
  B  Bomb2             | Alex object: explodes and then shoots in all directions.
  ,  Special character | You can produce strange effects with this object, in theory you should be able to create any object with it
-		      | the arguments are: type,state,direction,destroyable,blowable,killing,movable,shooted
+		              | the arguments are: type,state,direction,destroyable,blowable,killing,movable,shooted
  a  Metal Wall        | Well, it looks metal to me
 
 
