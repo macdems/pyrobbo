@@ -40,4 +40,4 @@ class Void(Sprite):
 @Board.sprite('H')
 class Grass(Sprite):
     IMAGE = images.GRASS
-    GROUPS = 'static', 'hit'
+    GROUPS = 'static', 'fragile'

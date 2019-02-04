@@ -43,12 +43,20 @@ class Board(object):
         self.sprites_teleport = pygame.sprite.Group()       # teleports
         self.sprites_mob = pygame.sprite.Group()            # mobs
         self.sprites_durable = pygame.sprite.Group()        # durable sprite
-        self.sprites_hit = pygame.sprite.Group()            # destroyed on hit
+        self.sprites_fragile = pygame.sprite.Group()        # destroyed on hit
+        self.sprites_blast = pygame.sprite.Group()          # blasts
         self.teleports = []
         self.scroll_offset = [0, 0]
         self.background = pygame.Surface(screen.get_size())
         self.background = self.background.convert()
 
+    def add_sprite(self, sprite):
+        self.sprites.add(sprite)
+        for group in sprite.GROUPS:
+            try:
+                getattr(self, 'sprites_'+group).add(sprite)
+            except AttributeError:
+                pass
 
     def init(self, level):
         """
@@ -81,13 +89,7 @@ class Board(object):
                 data = additional.get(c, {}).get(p, ())
                 Sprite = self.symbols.get(c)
                 if Sprite is not None:
-                    sprite = Sprite(p, *data)
-                    self.sprites.add(sprite)
-                    for group in sprite.GROUPS:
-                        try:
-                            getattr(self, 'sprites_'+group).add(sprite)
-                        except AttributeError:
-                            pass
+                    self.add_sprite(Sprite(p, *data))
 
         if 'screws' in level:
             game.status.parts = level['screws']

@@ -22,7 +22,7 @@ from .guns import fire_blast
 @Board.sprite('R')
 class Robbo(pygame.sprite.Sprite):
     """Obiekt naszego robocika"""
-    GROUPS = ()
+    GROUPS = 'fragile',
 
     def __init__(self, pos):
         """Inicjuje wszystko co niezbędne dla naszego robocika"""
@@ -82,6 +82,8 @@ class Robbo(pygame.sprite.Sprite):
                     if game.board.can_move(newrect.move(self.step)):
                         self.rect = newrect
                         for sprite in pushed:
+                            if hasattr(sprite, 'push'):
+                                sprite.push(self.step)
                             game.board.move_sprite(sprite, self.step)
                         sounds.push.play()
                     else:
@@ -139,6 +141,9 @@ class Robbo(pygame.sprite.Sprite):
             game.status.bullets -= 1
             game.status.update()
 
+    def hit(self):
+        self.die()
+
     def die(self):
         if self.alive():
             groups = self.groups()
@@ -151,7 +156,7 @@ class Robbo(pygame.sprite.Sprite):
 
 class DeadRobbo(Stars):
     """
-    Just stars but we mock Robbo attributes and methhods
+    Just stars but we mock Robbo attributes and methods
     """
     walking = None
 
@@ -159,6 +164,9 @@ class DeadRobbo(Stars):
         pass
 
     def fire(self, dir):
+        pass
+
+    def hit(self):
         pass
 
     def die(self):

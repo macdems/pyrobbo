@@ -55,9 +55,7 @@ class Teleport(BlinkingSprite):
 
         # Create disappear stars
         if moved:
-            stars = Stars(game.robbo.rect)
-            game.board.sprites.add(stars)
-            game.board.sprites_update.add(stars)
+            game.board.add_sprite(Stars(game.robbo.rect))
         # Or make Robbo reappear in the same place
         else:
             step = [0,0]

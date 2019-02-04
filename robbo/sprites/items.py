@@ -10,10 +10,14 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import random
+import pygame
 
 from .. import game, screen, images, sounds
 from ..board import Board, rectcollide
-from . import Sprite, BlinkingSprite, explode
+from . import Sprite, BlinkingSprite, Stars, explode
+from .guns import Gun
+from .static import Grass
 
 
 @Board.sprite('#')
@@ -22,32 +26,54 @@ class Box(Sprite):
     GROUPS = 'push',
 
 
+@Board.sprite('~')
+class SlideBox(Sprite):
+    IMAGE = images.BOX_SLIDE
+    GROUPS = 'push', 'update'
+
+    def __init__(self, pos):
+        super(SlideBox, self).__init__(pos)
+        self._step = None
+
+    def push(self, step):
+        self._step = step
+
+    def update(self):
+        if self._step is not None:
+            newrect = self.rect.move(self._step)
+            if game.board.can_move(newrect):
+                self.rect = newrect
+            else:
+                self._step = None
+
+
 @Board.sprite('b')
 class Bomb(Sprite):
     IMAGE = images.BOMB
-    GROUPS = 'push', 'hit'
+    GROUPS = 'push', 'fragile'
 
     _chain = []
 
     def hit(self):
         sounds.bomb.play()
+        rects = [self.rect.move((x, y)) for x in (-32, 0, 32) for y in (-32, 0, 32) if x != 0 or y != 0]
         rect = self.rect.inflate(64, 64)
         explode(self)
         hits = rectcollide(rect, game.board.sprites)
         for hit in hits:
+            try: rects.remove(hit.rect)
+            except ValueError: pass
             if hit is game.robbo:
                 game.robbo.die()
             elif isinstance(hit, Bomb):
-                self._chain.append(hit)
+                game.chain.append(hit)
             elif game.board.sprites_durable not in hit.groups():
                 explode(hit)
+        for rect in rects:
+            game.board.add_sprite(Stars(rect))
 
-    @staticmethod
-    def chain():
-        chain = Bomb._chain
-        Bomb._chain = []
-        for bomb in chain:
-            bomb.hit()
+    def chain(self):
+        self.hit()
 
 
 @Board.sprite('!')
@@ -119,3 +145,35 @@ class Door(Sprite):
         game.status.keys -= 1
         game.status.update()
         sounds.door.play()
+
+
+@Board.sprite('?')
+class Surprise(Sprite):
+    IMAGE = images.QUESTION
+    GROUPS = 'push', 'fragile'
+
+    class Spawn(Stars):
+        def update(self):
+            self._todie -= 1
+            if self._todie % self.UPDATE_TIME == 0:
+                if self._todie:
+                    self.image = self._images[self._todie // self.UPDATE_TIME - 1]
+                else:
+                    choice = random.choice((None, SlideBox, Screw, Bullet, Key, Bomb, Grass, Gun, Surprise#, Butterfly
+                                            ))
+                    self.kill()
+                    if choice is not None:
+                        pos = self.rect.left // 32 - 2, self.rect.top // 32 - 1
+                        sprite = choice(pos)
+                        game.board.add_sprite(sprite)
+                        print(sprite)
+                        if isinstance(sprite, Screw):
+                            game.status.parts -= 1  # screw constructor increased this
+                        elif isinstance(sprite, Capsule):
+                            sprite.activate()
+                        game.board.sprites.draw(screen)
+
+    def hit(self):
+        self.kill()
+        screen.blit(game.board.background, self.rect, self.rect)
+        game.board.add_sprite(self.Spawn(self.rect))

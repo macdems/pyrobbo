@@ -10,6 +10,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import random
 import pygame
 
 from .. import game, screen, screen_rect, images, sounds
@@ -23,30 +24,28 @@ def hit(rect):
     hits = rectcollide(rect, game.board.sprites)
     if hits:
         for hit in hits:
-            if game.board.sprites_hit in hit.groups():
+            if game.board.sprites_fragile in hit.groups():
                 if hasattr(hit, 'hit'):
                     hit.hit()
                 else:
                     sounds.blaster.play()
                     hit.kill()
                     screen.blit(game.board.background, hit.rect, hit.rect)
-                    stars = Stars(hit.rect)
-                    game.board.sprites.add(stars)
-                    game.board.sprites_update.add(stars)
+                    game.board.add_sprite(Stars(hit.rect))
         return True
     else:
         return False
 
 
-class Blast(pygame.sprite.Sprite):
+class ShortBlast(pygame.sprite.Sprite):
     """
     Short blast shot by Robbo and guns
     """
-    GROUPS = 'update'
+    GROUPS = 'blast',
     UPDATE_TIME = 1
 
     def __init__(self, rect, dir):
-        super(Blast, self).__init__()
+        super(ShortBlast, self).__init__()
         self.dir = dir
         if dir == EAST or dir == WEST:
             self._images = (
@@ -74,8 +73,31 @@ class Blast(pygame.sprite.Sprite):
 
 def fire_blast(source, dir):
     sounds.shoot.play()
-    pos = source.rect.move(STEPS[dir])
-    if game.board.rect.contains(pos) and not hit(pos):
-        blast = Blast(pos, dir)
-        game.board.sprites.add(blast)
-        game.board.sprites_update.add(blast)
+    rect = source.rect.move(STEPS[dir])
+    if game.board.rect.contains(rect) and not hit(rect):
+        blast = ShortBlast(rect, dir)
+        game.board.add_sprite(blast)
+
+
+@Board.sprite('}')
+class Gun(Sprite):
+    GROUPS = 'update',
+    IMAGES = images.GUN_E, images.GUN_S, images.GUN_W, images.GUN_N
+
+    SHOOT_FREQUENCY = 12
+
+    def __init__(self, pos, facing=None, moving=0, shot_type=0, moves=0, rotates=0, random_rotates=0):
+        if facing is None:
+            facing = random.randrange(4)
+            rotates = 1
+            random_rotates = 1
+            shot_type = 2
+        self.IMAGE = self.IMAGES[facing]
+        super(Gun, self).__init__(pos)
+        self.facing = facing
+        self.shot_type = shot_type
+        #TODO: all proper gun types
+
+    def update(self):
+        if random.randrange(self.SHOOT_FREQUENCY) == 0:
+            fire_blast(self, self.facing)

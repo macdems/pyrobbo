@@ -19,7 +19,7 @@ from . import BlinkingSprite
 
 
 class Mob(BlinkingSprite):
-    GROUPS = 'mob', 'update', 'hit'
+    GROUPS = 'mob', 'update', 'fragile'
     UPDATE_TIME = 3
 
     def __init__(self, pos, dir=0):
@@ -29,6 +29,8 @@ class Mob(BlinkingSprite):
     def try_move(self):
         step = STEPS[self.dir]
         newrect = self.rect.move(step)
+        if rectcollide(newrect, game.board.sprites_blast):
+            return True
         if game.board.can_move(newrect):
             self.rect = newrect
             return True

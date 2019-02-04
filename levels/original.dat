@@ -33,7 +33,7 @@
  l  Vertical Laser    | direction (only 1=south & 3=north)
  M  Magnet            | direction (all 4 directions)
  =  Force Field       | direction (only 0=east and 2=west)
- +  Extra Life        | Exists in some converted level packs but GNU Robbo does no    t support this object anymore.
+ +  Extra Life        | Exists in some converted level packs but GNU Robbo does not support this object anymore.
  X  Stop              | Millenium object.
  k  Radioactive Field | Millenium object.
  B  Bomb2             | Alex object: explodes and then shoots in all directions.

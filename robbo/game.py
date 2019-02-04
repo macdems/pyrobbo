@@ -24,6 +24,7 @@ status = None
 board = None
 robbo = None
 capsule = None
+chain = []
 
 from . import screen, screen_rect, clock, clock_speed, sounds
 from .board import Board
@@ -32,7 +33,6 @@ from .status import Status
 
 # Register all sprites — do not remove the line below
 from .sprites import explode
-from .sprites.items import Bomb
 
 class EndLevel(Exception):
     """
@@ -43,7 +43,9 @@ class EndLevel(Exception):
 
 def update_sprites():
     # Cleanup old stuff
-    screen.blit(board.background, robbo.rect, robbo.rect)
+    for sprite in board.sprites_blast.sprites():
+        screen.blit(board.background, sprite.rect, sprite.rect)
+    board.sprites_blast.update()
     for sprite in board.sprites_update.sprites():
         screen.blit(board.background, sprite.rect, sprite.rect)
     board.sprites_update.update()
@@ -109,7 +111,14 @@ def play_level(level):
             sprites_robbo.add(robbo)
 
         # Test for chained bombs and trigger them
-        Bomb.chain()
+        global chain
+        _chain = chain
+        chain = []
+        for item in _chain:
+            item.chain()
+
+        screen.blit(board.background, robbo.rect, robbo.rect)
+        update_sprites()
 
         # Process user events
         for event in pygame.event.get():
@@ -171,7 +180,6 @@ def play_level(level):
             else:
                 scrolling = 0
 
-        update_sprites()
         try:
             sprites_robbo.update()
         except EndLevel:
@@ -201,6 +209,7 @@ def play_level(level):
         else:
             # Draw moving sprites
             sprites_robbo.draw(screen)
+            board.sprites_blast.draw(screen)
             board.sprites_update.draw(screen)
             pygame.display.flip()
             clock.tick(clock_speed)

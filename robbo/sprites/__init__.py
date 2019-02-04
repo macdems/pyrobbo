@@ -65,13 +65,13 @@ class Stars(pygame.sprite.Sprite):
     GROUPS = 'update', 'durable'
     UPDATE_TIME = 1
 
-    def __init__(self, pos):
+    def __init__(self, rect):
         super(Stars, self).__init__()
         self._images = (
             game.images.get_icon(images.STARS3),
             game.images.get_icon(images.STARS2),
             game.images.get_icon(images.STARS1))
-        self.rect = pos
+        self.rect = rect
         self._todie = len(self._images) * self.UPDATE_TIME
         self.image = self._images[-1]
 
@@ -87,9 +87,7 @@ class Stars(pygame.sprite.Sprite):
 def explode(target):
     target.kill()
     screen.blit(game.board.background, target.rect, target.rect)
-    stars = Stars(target.rect)
-    game.board.sprites.add(stars)
-    game.board.sprites_update.add(stars)
+    game.board.add_sprite(Stars(target.rect))
 
 
 # Register all sprites
