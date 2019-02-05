@@ -44,10 +44,10 @@ class Teleport(BlinkingSprite):
             if dest is None:
                 warn('Target does not exist. This is probably an error in the level file.')
                 continue
-            for n in range(4):
+            for _ in range(4):
                 step = STEPS[direct]
-                new = dest.rect.move(step)
-                if game.board.rect.contains(new) and not rectcollide(new, game.board.sprites):
+                newrect = dest.rect.move(step)
+                if game.board.can_move(newrect):
                     moved = 1
                     break
                 direct = (direct - 1) % 4

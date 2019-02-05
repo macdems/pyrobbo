@@ -29,8 +29,7 @@ class Mob(BlinkingSprite):
         super(Mob, self).__init__(pos)
         self.dir = dir
 
-    def try_move(self):
-        step = STEPS[self.dir]
+    def try_step(self, step):
         newrect = self.rect.move(step)
         if rectcollide(newrect, game.board.sprites_blast):
             return True
@@ -59,9 +58,9 @@ class Bird(Mob):
         self.shooting_dir = shooting_dir
 
     def move(self):
-        if not self.try_move():
+        if not self.try_step(STEPS[self.dir]):
             self.dir = (self.dir + 2) % 4
-            self.try_move()
+            self.try_step(STEPS[self.dir])
         if self.shooting:
             if random.randrange(self.SHOOT_FREQUENCY) == 0:
                 fire_blast(self, self.shooting_dir)
@@ -74,7 +73,7 @@ class Bear(Mob):
     def move(self):
         self.dir = (self.dir - 1) % 4
         for _ in range(4):
-            if self.try_move(): break
+            if self.try_step(STEPS[self.dir]): break
             self.dir = (self.dir + 1) % 4
 
 
@@ -85,5 +84,31 @@ class Devil(Mob):
     def move(self):
         self.dir = (self.dir + 1) % 4
         for _ in range(4):
-            if self.try_move(): break
+            if self.try_step(STEPS[self.dir]): break
             self.dir = (self.dir - 1) % 4
+
+
+@Board.sprite('V')
+class Eyes(Mob):
+    IMAGES = images.BUTTERFLY1, images.BUTTERFLY2
+
+    HUNT_PROBABILITY = 0.65
+
+    def move(self):
+        if random.random() < self.HUNT_PROBABILITY:
+            # Head for the Robbo
+            x0, y0 = self.rect.topleft
+            x1, y1 = game.robbo.rect.topleft
+            dx, dy = x1 - x0, y1 - y0
+            i = 0 if abs(dx) > abs(dy) else 1
+            dx = -32 if dx < 0 else 32
+            dy = -32 if dy < 0 else 32
+            steps = ((0, dy), (dx, 0), (-dx, 0), None) if i else ((dx, 0), (0, dy), (0, -dy), None)
+        else:
+            # Random move
+            steps = [STEPS[n] for n in (NORTH, SOUTH, EAST, WEST)] + [None]
+            random.shuffle(steps)
+        for step in steps:
+            if step is None or self.try_step(step):
+                break
+
