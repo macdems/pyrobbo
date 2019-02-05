@@ -52,6 +52,9 @@ class Robbo(pygame.sprite.Sprite):
 
         game.robbo = self
 
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
     def spawn(self):
         self.step = [0, 0]
         self.walking = STOP
@@ -160,6 +163,10 @@ class DeadRobbo(Stars):
     Just stars but we mock Robbo attributes and methods
     """
     walking = None
+
+    def draw(self, surface):
+        if self.alive():
+            surface.blit(self.image, self.rect)
 
     def move_key(self, direct):
         pass

@@ -110,6 +110,12 @@ class Screw(Sprite):
         sounds.screw.play()
         if game.status.parts == 0:
             sounds.lastscrew.play()
+            original = screen.copy()
+            screen.fill((255, 255, 255))
+            pygame.display.flip()
+            screen.blit(original, (0,0))
+            game.clock.tick(24)     # cinematic frame ;)
+            pygame.display.flip()
             if game.capsule is not None:
                 game.capsule.activate()
 

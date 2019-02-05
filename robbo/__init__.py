@@ -38,7 +38,8 @@ def main():
             try:
                 game.play_level(level)
             except game.SelectLevel as selected:
-                level = selected.level
+                if selected.level < len(game.levels):
+                    level = selected.level
             else:
                 level += 1
     except SystemExit:

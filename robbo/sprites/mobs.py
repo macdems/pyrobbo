@@ -101,8 +101,8 @@ class Eyes(Mob):
             x1, y1 = game.robbo.rect.topleft
             dx, dy = x1 - x0, y1 - y0
             i = 0 if abs(dx) > abs(dy) else 1
-            dx = -32 if dx < 0 else 32
-            dy = -32 if dy < 0 else 32
+            dx = -32 if dx < 0 else 32 if dx > 0 else 0
+            dy = -32 if dy < 0 else 32 if dy > 0 else 0
             steps = ((0, dy), (dx, 0)) if i else ((dx, 0), (0, dy))
             if random.randrange(3) == 0:
                 steps = reversed(steps)

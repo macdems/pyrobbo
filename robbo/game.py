@@ -46,6 +46,14 @@ else:
         skin = 'default'
 
 
+MOVES = {
+    K_UP: NORTH,
+    K_DOWN: SOUTH,
+    K_LEFT: WEST,
+    K_RIGHT: EAST
+}
+
+
 class EndLevel(Exception):
     """End level exception"""
     pass
@@ -66,6 +74,12 @@ def update_sprites():
     for sprite in board.sprites_update.sprites():
         screen.blit(board.background, sprite.rect, sprite.rect)
     board.sprites_update.update()
+
+
+def draw_sprites():
+    robbo.draw(screen)
+    board.sprites_blast.draw(screen)
+    board.sprites_update.draw(screen)
 
 
 def play_level(level):
@@ -90,9 +104,6 @@ def play_level(level):
 
     # Draw static sprites
     board.sprites.draw(screen)
-
-    # Init updatable sprites
-    sprites_robbo = pygame.sprite.RenderPlain(robbo)
 
     while True:
         # Check if robbo died and, if so, recreate board
@@ -124,8 +135,6 @@ def play_level(level):
             board.scroll_offset = [0, offset]
             board.rect.move_ip(0, offset)
             board.sprites.draw(screen)
-            board.sprites.draw(screen)
-            sprites_robbo.add(robbo)
 
         # Test for chained bombs and trigger them
         global chain
@@ -137,6 +146,8 @@ def play_level(level):
         screen.blit(board.background, robbo.rect, robbo.rect)
         update_sprites()
 
+        move = None
+
         # Process user events
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -144,33 +155,19 @@ def play_level(level):
             elif event.type == KEYDOWN:
                 # Robbo moves
                 mods = pygame.key.get_mods()
-                if event.key == K_UP:
+                if event.key in MOVES:
+                    move = MOVES[event.key]
                     if mods & KMOD_SHIFT:
-                        robbo.fire(NORTH)
+                        robbo.fire(move)
+                        move = None
                     else:
-                        robbo.move_key(NORTH)
-                elif event.key == K_DOWN:
-                    if mods & KMOD_SHIFT:
-                        robbo.fire(SOUTH)
-                    else:
-                        robbo.move_key(SOUTH)
-                elif event.key == K_LEFT:
-                    if mods & KMOD_SHIFT:
-                        robbo.fire(WEST)
-                    else:
-                        robbo.move_key(WEST)
-                elif event.key == K_RIGHT:
-                    if mods & KMOD_SHIFT:
-                        robbo.fire(EAST)
-                    else:
-                        robbo.move_key(EAST)
+                        robbo.move_key(move)
+                        robbo_moved = NORTH
                 # system keys
                 elif event.key == K_f:
                      pygame.display.toggle_fullscreen()
                 elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
-                    sprites_robbo.draw(screen)
-                    board.sprites_blast.draw(screen)
-                    board.sprites_update.draw(screen)
+                    draw_sprites()
                     raise SelectLevel(status.select_level())
                 elif event.key == K_PLUS or event.key == K_EQUALS:
                     clock_speed *= 1.2
@@ -180,15 +177,10 @@ def play_level(level):
                     robbo.die()
                 elif event.key == K_q and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
                     sys.exit(0)
-            elif event.type == KEYUP:
-                if event.key == K_UP:
-                    if robbo.walking == NORTH: robbo.move_key(STOP)
-                elif event.key == K_DOWN:
-                    if robbo.walking == SOUTH: robbo.move_key(STOP)
-                elif event.key == K_LEFT:
-                    if robbo.walking == WEST: robbo.move_key(STOP)
-                elif event.key == K_RIGHT:
-                    if robbo.walking == EAST: robbo.move_key(STOP)
+            elif event.type == KEYUP and event.key in MOVES:
+                if MOVES[event.key] == robbo.walking:
+                    if move: robbo.update()
+                    robbo.move_key(STOP)
         pygame.event.pump()
 
         # Check if scrolling is needed
@@ -203,7 +195,7 @@ def play_level(level):
                 scrolling = 0
 
         try:
-            sprites_robbo.update()
+            robbo.update()
         except EndLevel:
             sounds.finish.play()
             w, h = screen.get_size()
@@ -230,9 +222,7 @@ def play_level(level):
                 clock.tick(clock_speed*4)
         else:
             # Draw moving sprites
-            sprites_robbo.draw(screen)
-            board.sprites_blast.draw(screen)
-            board.sprites_update.draw(screen)
+            draw_sprites()
             pygame.display.flip()
             clock.tick(clock_speed)
 
