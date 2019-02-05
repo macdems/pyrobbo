@@ -140,6 +140,8 @@ class Gun(Sprite):
     SHOOT_FREQUENCY = 12
     ROTATE_FREQUENCY = 12
 
+    MOVE_DELAY = 3
+
     BIG_BLAST_ICONS = images.STARS1, images.STARS2, images.STARS3, images.STARS2, images.STARS1
 
     def __init__(self, pos, facing=None, moving=0, shot_type=0, moves=0, rotates=0, rotates_random=0):
@@ -155,25 +157,39 @@ class Gun(Sprite):
         self.rotates_random = rotates_random
         self.rotates = rotates
         self._to_rotate = self.ROTATE_FREQUENCY
-        #TODO: moving gun
+        self.moves = moves
+        self.moving = moving
         if moves:
             self.GROUPS = Gun.GROUPS + ('push',)
+            self._tomove = self.MOVE_DELAY
         else:
             self.GROUPS = Gun.GROUPS + ('static',)
         self.blasting = False
 
     def update(self):
-        if self.rotates and not self.blasting:
-            if self.rotates_random:
-                self._to_rotate = random.randrange(self.ROTATE_FREQUENCY)
-            else:
-                self._to_rotate -= 1
-            if self._to_rotate == 0:
-                self._to_rotate = self.ROTATE_FREQUENCY
-                twist = -1
-                if self.rotates_random and random.randrange(2): twist = 1
-                self.facing = (self.facing + twist) % 4
-                self.image = game.images.get_icon(self.IMAGES[self.facing])
+        if not self.blasting:
+            if self.moves:
+                self._tomove -= 1
+                if self._tomove == 0:
+                    step = STEPS[self.moving]
+                    newrect = self.rect.move(step)
+                    if game.board.can_move(newrect):
+                        self.rect = newrect
+                    else:
+                        self.moving = (self.moving + 2) % 4
+                        if game.board.can_move(newrect): self.rect = newrect
+                    self._tomove = self.MOVE_DELAY
+            if self.rotates:
+                if self.rotates_random:
+                    self._to_rotate = random.randrange(self.ROTATE_FREQUENCY)
+                else:
+                    self._to_rotate -= 1
+                if self._to_rotate == 0:
+                    self._to_rotate = self.ROTATE_FREQUENCY
+                    twist = -1
+                    if self.rotates_random and random.randrange(2): twist = 1
+                    self.facing = (self.facing + twist) % 4
+                    self.image = game.images.get_icon(self.IMAGES[self.facing])
         if self.shot_type == 2:
             if self.blasting:
                 fire_blast(self, self.facing, self.BIG_BLAST_ICONS[self.blasting])
@@ -182,7 +198,7 @@ class Gun(Sprite):
                 if random.randrange(self.SHOOT_FREQUENCY) == 0:
                     fire_blast(self, self.facing, self.BIG_BLAST_ICONS[-1])
                     self.blasting = len(self.BIG_BLAST_ICONS) - 1
-        if self.shot_type == 1:
+        elif self.shot_type == 1:
             if not self.blasting and random.randrange(self.SHOOT_FREQUENCY) == 0:
                 rect = self.rect.move(STEPS[self.facing])
                 if game.board.rect.contains(rect) and not hit(rect):
