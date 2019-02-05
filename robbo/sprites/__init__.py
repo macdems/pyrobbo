@@ -68,9 +68,9 @@ class Stars(pygame.sprite.Sprite):
     def __init__(self, rect):
         super(Stars, self).__init__()
         self._images = (
-            game.images.get_icon(images.STARS3),
+            game.images.get_icon(images.STARS1),
             game.images.get_icon(images.STARS2),
-            game.images.get_icon(images.STARS1))
+            game.images.get_icon(images.STARS3))
         self.rect = rect
         self._todie = len(self._images) * self.UPDATE_TIME
         self.image = self._images[-1]

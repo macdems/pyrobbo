@@ -40,9 +40,9 @@ class Robbo(pygame.sprite.Sprite):
         # Teleport and die _images
         self.spawn_images = (
             game.images.get_icon(images.ROBBO_S1),
-            game.images.get_icon(images.STARS1), game.images.get_icon(images.STARS1),
+            game.images.get_icon(images.STARS3), game.images.get_icon(images.STARS3),
             game.images.get_icon(images.STARS2), game.images.get_icon(images.STARS2),
-            game.images.get_icon(images.STARS3), game.images.get_icon(images.STARS3)
+            game.images.get_icon(images.STARS1), game.images.get_icon(images.STARS1)
         )
 
         # Initial position and movement

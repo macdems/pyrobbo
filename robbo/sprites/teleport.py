@@ -44,13 +44,13 @@ class Teleport(BlinkingSprite):
             if dest is None:
                 warn('Target does not exist. This is probably an error in the level file.')
                 continue
-            for _ in range(4):
+            for k in range(4):
                 step = STEPS[direct]
                 newrect = dest.rect.move(step)
                 if game.board.can_move(newrect):
                     moved = 1
                     break
-                direct = (direct - 1) % 4
+                direct ^= (((k + 1) % 2) + 2)
             if moved: break
 
         # Create disappear stars

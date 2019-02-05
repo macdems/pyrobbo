@@ -83,6 +83,8 @@ class LongBlast(pygame.sprite.Sprite):
     """
     GROUPS = 'blast',
 
+    END_IMAGES = images.STARS1, images.STARS3, images.STARS1
+
     def __init__(self, rect, dir, prev):
         super(LongBlast, self).__init__()
         self.dir = dir
@@ -98,9 +100,10 @@ class LongBlast(pygame.sprite.Sprite):
         self.rect = rect
         self._prev = prev
         self._head = True
+        self._end = None
 
     def update(self):
-        self.ci = 1 - self.ci
+        self.ci = (self.ci + 1) % len(self._images)
         self.image = self._images[self.ci]
         if self._head:
             self._head = False
@@ -111,14 +114,23 @@ class LongBlast(pygame.sprite.Sprite):
             else:
                 next = LongBlast(newrect, self.dir, self)
                 game.board.add_sprite(next)
+        elif self._end is not None:
+            if self._end == 0:
+                self.kill()
+                screen.blit(game.board.background, self.rect, self.rect)
+                self._prev.blasting = False
+            self._end -= 1
 
     def chain(self):
-        self.kill()
-        screen.blit(game.board.background, self.rect, self.rect)
         if isinstance(self._prev, LongBlast):
+            self.kill()
+            screen.blit(game.board.background, self.rect, self.rect)
             game.chain.append(self._prev)
         elif isinstance(self._prev, Gun):
-            self._prev.blasting = False
+            self._images = tuple(game.images.get_icon(i) for i in self.END_IMAGES)
+            self.ci = -1
+            self._end = len(self.END_IMAGES)
+
 
 @Board.sprite('}')
 class Gun(Sprite):
@@ -128,7 +140,7 @@ class Gun(Sprite):
     SHOOT_FREQUENCY = 12
     ROTATE_FREQUENCY = 12
 
-    BIG_BLAST_ICONS = images.STARS3, images.STARS2, images.STARS1, images.STARS2, images.STARS3
+    BIG_BLAST_ICONS = images.STARS1, images.STARS2, images.STARS3, images.STARS2, images.STARS1
 
     def __init__(self, pos, facing=None, moving=0, shot_type=0, moves=0, rotates=0, rotates_random=0):
         if facing is None:

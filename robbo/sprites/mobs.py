@@ -92,18 +92,20 @@ class Devil(Mob):
 class Eyes(Mob):
     IMAGES = images.BUTTERFLY1, images.BUTTERFLY2
 
-    HUNT_PROBABILITY = 0.65
+    HUNT_PROBABILITY = 0.8
 
     def move(self):
         if random.random() < self.HUNT_PROBABILITY:
             # Head for the Robbo
-            x0, y0 = self.rect.topleft
+            x0, y0 = self. rect.topleft
             x1, y1 = game.robbo.rect.topleft
             dx, dy = x1 - x0, y1 - y0
             i = 0 if abs(dx) > abs(dy) else 1
             dx = -32 if dx < 0 else 32
             dy = -32 if dy < 0 else 32
-            steps = ((0, dy), (dx, 0), (-dx, 0), None) if i else ((dx, 0), (0, dy), (0, -dy), None)
+            steps = ((0, dy), (dx, 0)) if i else ((dx, 0), (0, dy))
+            if random.randrange(3) == 0:
+                steps = reversed(steps)
         else:
             # Random move
             steps = [STEPS[n] for n in (NORTH, SOUTH, EAST, WEST)] + [None]
