@@ -69,7 +69,7 @@ class Bomb(Sprite):
             if hit is game.robbo:
                 game.robbo.die()
             elif isinstance(hit, Bomb):
-                game.chain.append(hit)
+                game.board.chain.append(hit)
             elif game.board.sprites_durable not in hit.groups():
                 explode(hit)
         for rect in rects:

@@ -112,7 +112,7 @@ class LongBlast(pygame.sprite.Sprite):
             self._head = False
             newrect = self.rect.move(STEPS[self.dir])
             if not game.board.rect.contains(newrect) or hit(newrect):
-                game.chain.append(self)
+                game.board.chain.append(self)
             else:
                 next = LongBlast(newrect, self.dir, self)
                 game.board.add_sprite(next)
@@ -127,7 +127,7 @@ class LongBlast(pygame.sprite.Sprite):
         if isinstance(self._prev, LongBlast):
             self.kill()
             screen.blit(game.board.background, self.rect, self.rect)
-            game.chain.append(self._prev)
+            game.board.chain.append(self._prev)
         elif isinstance(self._prev, Gun):
             self._images = tuple(game.images.get_icon(i) for i in self.END_IMAGES)
             self.ci = -1

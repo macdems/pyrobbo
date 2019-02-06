@@ -24,7 +24,6 @@ status = None
 board = None
 robbo = None
 capsule = None
-chain = []
 
 from . import screen, screen_rect, clock, clock_speed, skin, sounds
 from .board import Board
@@ -99,8 +98,6 @@ def play_level(level):
     # Draw static sprites
     board.sprites.draw(screen)
 
-    global chain
-
     while True:
         # Check if robbo died and, if so, recreate board
         if not robbo.alive():
@@ -123,7 +120,6 @@ def play_level(level):
             for _ in range(6):
                 update_sprites()
                 clock.tick(clock_speed)
-            chain = []
             # Recreate board
             offset = board.scroll_offset[1]
             status.clear()
@@ -136,9 +132,9 @@ def play_level(level):
             board.sprites.draw(screen)
 
         # Test for chained bombs and trigger them
-        _chain = chain
-        chain = []
-        for item in _chain:
+        chain = board.chain
+        board.chain = []
+        for item in chain:
             item.chain()
 
         cleanup_sprites()

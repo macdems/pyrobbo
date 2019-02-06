@@ -91,6 +91,8 @@ class Board(object):
                 if Sprite is not None:
                     self.add_sprite(Sprite(p, *data))
 
+        self.chain = []
+
         if 'screws' in level:
             game.status.parts = level['screws']
 
