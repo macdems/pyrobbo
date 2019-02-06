@@ -16,7 +16,7 @@ import pygame
 from .. import game, screen, images, sounds
 from ..board import Board, rectcollide
 from . import Sprite, BlinkingSprite, Stars, explode
-from .guns import Gun
+from .guns import Gun, hit
 from .static import Grass
 from .mobs import Eyes
 
@@ -42,10 +42,10 @@ class SlideBox(Sprite):
     def update(self):
         if self._step is not None:
             newrect = self.rect.move(self._step)
-            if game.board.can_move(newrect):
-                self.rect = newrect
-            else:
+            if hit(newrect):
                 self._step = None
+            else:
+                self.rect = newrect
 
 
 @Board.sprite('b')
@@ -82,7 +82,7 @@ class Capsule(BlinkingSprite):
     IMAGES = images.CAPSULE1, images.CAPSULE2
     UPDATE_TIME = 0
     GROUPS = 'push', 'update'
-    
+
     def __init__(self, pos):
         super(Capsule, self).__init__(pos)
         self.active = False
