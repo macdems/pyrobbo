@@ -71,10 +71,8 @@ class ShortBlast(pygame.sprite.Sprite):
 
 
 def fire_blast(source, dir, icon=None):
-    rect = source.rect.move(STEPS[dir])
-    if game.board.rect.contains(rect) and not hit(rect):
-        blast = ShortBlast(rect, dir, icon)
-        game.board.add_sprite(blast)
+    blast = ShortBlast(source.rect, dir, icon)
+    game.board.add_sprite(blast)
 
 
 class LongBlast(pygame.sprite.Sprite):
@@ -94,8 +92,10 @@ class LongBlast(pygame.sprite.Sprite):
             self._images = game.images.get_icon(images.BLAST_V1), game.images.get_icon(images.BLAST_V2)
         if isinstance(prev, LongBlast):
             self.ci = prev.ci
+            self._skipframe = False
         else:
             self.ci = 0
+            self._skipframe = True  # we need this as this will be updated in the same frame
         self.image = self._images[0]
         self.rect = rect
         self._prev = prev
@@ -103,6 +103,9 @@ class LongBlast(pygame.sprite.Sprite):
         self._end = None
 
     def update(self):
+        if self._skipframe:
+            self._skipframe = False
+            return
         self.ci = (self.ci + 1) % len(self._images)
         self.image = self._images[self.ci]
         if self._head:

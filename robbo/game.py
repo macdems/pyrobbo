@@ -66,13 +66,18 @@ class SelectLevel(Exception):
         self.level = level
 
 
-def update_sprites():
-    # Cleanup old stuff
-    for sprite in board.sprites_update.sprites():
-        screen.blit(board.background, sprite.rect, sprite.rect)
-    board.sprites_update.update()
+def cleanup_sprites():
     for sprite in board.sprites_blast.sprites():
         screen.blit(board.background, sprite.rect, sprite.rect)
+    for sprite in board.sprites_update.sprites():
+        screen.blit(board.background, sprite.rect, sprite.rect)
+    screen.blit(board.background, robbo.rect, robbo.rect)
+
+
+def update_sprites(cleanup=True):
+    if cleanup:
+        cleanup_sprites()
+    board.sprites_update.update()
     board.sprites_blast.update()
 
 
@@ -143,8 +148,7 @@ def play_level(level):
         for item in _chain:
             item.chain()
 
-        screen.blit(board.background, robbo.rect, robbo.rect)
-        update_sprites()
+        cleanup_sprites()
 
         move = None
 
@@ -193,6 +197,8 @@ def play_level(level):
                 scrolling -= 1
             else:
                 scrolling = 0
+
+        update_sprites(False)
 
         try:
             robbo.update()
