@@ -18,6 +18,7 @@ from ..board import Board, rectcollide
 from . import Sprite, BlinkingSprite, Stars, explode
 from .guns import Gun
 from .static import Grass
+from .mobs import Eyes
 
 
 @Board.sprite('#')
@@ -175,7 +176,7 @@ class Surprise(Sprite):
                         Grass,
                         Gun,
                         Surprise,
-                        #Butterfly,
+                        Eyes,
                         #Life,
                     ))
                     self.kill()
