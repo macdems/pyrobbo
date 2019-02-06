@@ -88,7 +88,15 @@ class Capsule(BlinkingSprite):
         self.active = False
         game.capsule = self
 
-    def activate(self):
+    def activate(self, yuppie=True):
+        if yuppie:
+            sounds.lastscrew.play()
+            original = screen.copy()
+            screen.fill((255, 255, 255))
+            pygame.display.flip()
+            screen.blit(original, (0,0))
+            game.clock.tick(24)     # cinematic frame ;)
+            pygame.display.flip()
         self.active = True
         self.UPDATE_TIME = self.update_time = 3
 
@@ -110,13 +118,6 @@ class Screw(Sprite):
         # Gramy dźwięk
         sounds.screw.play()
         if game.status.parts == 0:
-            sounds.lastscrew.play()
-            original = screen.copy()
-            screen.fill((255, 255, 255))
-            pygame.display.flip()
-            screen.blit(original, (0,0))
-            game.clock.tick(24)     # cinematic frame ;)
-            pygame.display.flip()
             if game.capsule is not None:
                 game.capsule.activate()
 
@@ -187,7 +188,7 @@ class Surprise(Sprite):
                         if isinstance(sprite, Screw):
                             game.status.parts -= 1  # screw constructor increased this
                         elif isinstance(sprite, Capsule):
-                            sprite.activate()
+                            sprite.activate(False)
                         game.board.sprites.draw(screen)
 
     def hit(self):

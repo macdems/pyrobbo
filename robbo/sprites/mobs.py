@@ -118,7 +118,7 @@ class Eyes(Mob):
 @Board.sprite('=')
 class Barrier(BlinkingSprite):
     IMAGES = images.FORCE1, images.FORCE2
-    GROUPS = 'update', 'fragile'
+    GROUPS = 'blast', 'fragile'
     UPDATE_TIME = 2
 
     def __init__(self, pos, dir):

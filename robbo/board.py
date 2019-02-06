@@ -94,6 +94,9 @@ class Board(object):
         if 'screws' in level:
             game.status.parts = level['screws']
 
+        if game.status.parts == 0 and game.capsule is not None:
+            game.capsule.activate()
+
     def move_sprite(self, sprite, step):
         """Przesuwa sprite o dany krok"""
         screen.blit(game.board.background, sprite.rect, sprite.rect)

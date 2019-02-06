@@ -116,6 +116,8 @@ def play_level(level):
             # Wait
             for _ in range(6):
                 update_sprites()
+                draw_sprites()
+                pygame.display.flip()
                 clock.tick(clock_speed)
             # Cleanup board
             sounds.die.play()
