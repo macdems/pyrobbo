@@ -126,7 +126,11 @@ def rectcollide(rect, group):
     """
     crashed = []
     spritecollide = rect.colliderect
-    for s in group.sprites():
+    try:
+        sprites = group.sprites()
+    except AttributeError:
+        sprites = group
+    for s in sprites:
         if spritecollide(s.rect):
             crashed.append(s)
     return crashed

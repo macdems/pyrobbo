@@ -16,7 +16,7 @@ import pygame
 from .. import game, screen, screen_rect, images, sounds
 from ..board import Board, rectcollide
 from ..defs import *
-from . import BlinkingSprite
+from . import Sprite, BlinkingSprite
 
 from .guns import fire_blast
 
@@ -114,3 +114,84 @@ class Eyes(Mob):
             if step is None or self.try_step(step):
                 break
 
+
+@Board.sprite('=')
+class Barrier(BlinkingSprite):
+    IMAGES = images.FORCE1, images.FORCE2
+    GROUPS = 'update', 'fragile'
+    UPDATE_TIME = 2
+
+    def __init__(self, pos, dir):
+        super(Barrier, self).__init__(pos)
+        self.dir = dir
+
+    def kill(self):
+        super(Barrier, self).kill()
+
+    def update(self):
+        super(Barrier, self).update()
+        newrect = self.rect.move(STEPS[self.dir])
+        if game.board.rect.contains(newrect):
+            sprites = rectcollide(newrect, game.board.sprites)
+            if not sprites:
+                self.rect = newrect
+                return
+            for sprite in sprites:
+                if sprite is game.robbo:
+                    game.robbo.die()
+                    return
+                elif isinstance(sprite, Barrier):
+                    self.rect = newrect
+                    return
+                elif game.board.sprites_static in sprite.groups():
+                    width = self.rect.width
+                    top = self.rect.top
+                    if self.dir == WEST:
+                        end = game.board.rect.right - width
+                        rect = pygame.Rect(self.rect.right, top,
+                                           end - self.rect.left, self.rect.height)
+                        select = min
+                        dx = - width
+                    else:
+                        end = game.board.rect.left
+                        rect = pygame.Rect(end, top,
+                                           self.rect.left - end, self.rect.height)
+                        select = max
+                        dx = width
+                    walls = rectcollide(rect, game.board.sprites_static)
+                    if not walls:
+                        self.rect = pygame.Rect(end, self.top, width, self.rect.height)
+                    else:
+                        wall = select(walls, key=lambda s: s.rect.left)
+                        self.rect = pygame.Rect(wall.rect.left + dx, top, width, self.rect.height)
+                else:
+                    sprite.kill()
+                    self.rect = newrect
+
+
+@Board.sprite('M')
+class Magnet(Sprite):
+    GROUPS = 'static', 'update'
+
+    def __init__(self, pos, dir):
+        self.dir = dir
+        self.IMAGE = {EAST: images.MAGNET_R, WEST: images.MAGNET_L}[dir]
+        super(Magnet, self).__init__(pos)
+
+    def update(self):
+        top = self.rect.top
+        if game.robbo.rect.top < self.rect.bottom and game.robbo.rect.bottom > top:
+            if self.dir == WEST:
+                right = game.robbo.rect.right
+                left = self.rect.left
+            else:
+                right = self.rect.right
+                left = game.robbo.rect.left
+            if left == right:
+                game.robbo.die()
+            elif left > right:
+                rect = pygame.Rect(right, top, left - right, self.rect.height)
+                if not rectcollide(rect, game.board.sprites):
+                    game.robbo.active = False
+                    game.robbo.walking = STOP
+                    game.robbo.step = STEPS[2-self.dir]

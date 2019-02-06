@@ -107,7 +107,6 @@ class LongBlast(pygame.sprite.Sprite):
         self.image = self._images[self.ci]
         if self._head:
             self._head = False
-            game.board.sprites_static.add(self)     # Robbo cannot enter
             newrect = self.rect.move(STEPS[self.dir])
             if not game.board.rect.contains(newrect) or hit(newrect):
                 game.chain.append(self)
@@ -192,8 +191,8 @@ class Gun(Sprite):
                     self.image = game.images.get_icon(self.IMAGES[self.facing])
         if self.shot_type == 2:
             if self.blasting:
-                fire_blast(self, self.facing, self.BIG_BLAST_ICONS[self.blasting])
                 self.blasting -= 1
+                fire_blast(self, self.facing, self.BIG_BLAST_ICONS[self.blasting])
             else:
                 if random.randrange(self.SHOOT_FREQUENCY) == 0:
                     fire_blast(self, self.facing, self.BIG_BLAST_ICONS[-1])

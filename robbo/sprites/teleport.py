@@ -27,11 +27,14 @@ class Teleport(BlinkingSprite):
     GROUPS = 'teleport', 'update'
     UPDATE_TIME = 3
 
-    def __init__(self, pos, group, no):
+    def __init__(self, pos, group=None, no=None):
         super(Teleport, self).__init__(pos)
-        self.group = group-1
-        self.no = no
-        game.board.teleports[self.group][no] = self
+        if group is not None:
+            self.group = group-1
+            self.no = no
+            game.board.teleports[self.group][no] = self
+        else:
+            self.group = None
 
     def teleport(self, step):
         """Move Robbo to the target teleport"""
@@ -39,7 +42,10 @@ class Teleport(BlinkingSprite):
         # Check possible destination
         direct = STEPS.index(step)
         moved = 0
-        target = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]
+        if self.group is not None:
+            target = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]
+        else:
+            target = None
         for dest in target, self:
             if dest is None:
                 warn('Target does not exist. This is probably an error in the level file.')

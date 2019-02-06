@@ -49,6 +49,7 @@ class Robbo(pygame.sprite.Sprite):
         self.pos = pos
         self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
         self.spawn()
+        self.active = True
 
         game.robbo = self
 
@@ -69,7 +70,7 @@ class Robbo(pygame.sprite.Sprite):
         else:
             newrect = self.rect.move(self.step)
 
-            groups = 'static',
+            groups = 'static', 'blast'
             if game.status.keys == 0:
                 groups += 'door',
 
@@ -131,15 +132,16 @@ class Robbo(pygame.sprite.Sprite):
                     self.die()
 
     def move_key(self, direct):
-        self.step = [0, 0]
-        self.walking = direct
-        if direct != STOP:
-            self.step = STEPS[direct]
-        else:
-            self.step = (0, 0)
+        if self.active:
+            self.step = [0, 0]
+            self.walking = direct
+            if direct != STOP:
+                self.step = STEPS[direct]
+            else:
+                self.step = (0, 0)
 
     def fire(self, dir):
-        if game.status.bullets > 0:
+        if self.active and game.status.bullets > 0:
             sounds.shoot.play()
             fire_blast(self, dir)
             game.status.bullets -= 1
@@ -163,6 +165,7 @@ class DeadRobbo(Stars):
     Just stars but we mock Robbo attributes and methods
     """
     walking = None
+    active = False
 
     def draw(self, surface):
         if self.alive():

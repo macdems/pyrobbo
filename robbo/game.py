@@ -68,12 +68,12 @@ class SelectLevel(Exception):
 
 def update_sprites():
     # Cleanup old stuff
-    for sprite in board.sprites_blast.sprites():
-        screen.blit(board.background, sprite.rect, sprite.rect)
-    board.sprites_blast.update()
     for sprite in board.sprites_update.sprites():
         screen.blit(board.background, sprite.rect, sprite.rect)
     board.sprites_update.update()
+    for sprite in board.sprites_blast.sprites():
+        screen.blit(board.background, sprite.rect, sprite.rect)
+    board.sprites_blast.update()
 
 
 def draw_sprites():
