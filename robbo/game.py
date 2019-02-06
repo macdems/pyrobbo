@@ -3,7 +3,7 @@
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of GNU General Public License as published by the
-# Free Software Foundation; imageseither version 3 of the license, or (at your
+# Free Software Foundation; either version 3 of the license, or (at your
 # opinion) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -11,7 +11,6 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import sys
-import os
 
 import pygame
 from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, K_l, \
@@ -27,23 +26,13 @@ robbo = None
 capsule = None
 chain = []
 
-from . import screen, screen_rect, clock, clock_speed, sounds
+from . import screen, screen_rect, clock, clock_speed, skin, sounds
 from .board import Board
 from .images import Images
 from .status import Status
 
 # Register all sprites — do not remove the line below
 from .sprites import explode
-
-
-try:
-    skin = sys.argv[1]
-except IndexError:
-    skin = 'default'
-else:
-    if not os.path.exists(os.path.join('skins', skin, 'icons.png')) or \
-       not os.path.exists(os.path.join('skins', skin, 'digits.png')):
-        skin = 'default'
 
 
 MOVES = {
@@ -219,7 +208,7 @@ def play_level(level):
             return
 
         if scrolling:
-            for n in range(4):
+            for _ in range(4):
                 for sprite in board.sprites.sprites():
                     screen.blit(board.background, sprite.rect, sprite.rect)
                     sprite.rect.move_ip(0, scrolldir)

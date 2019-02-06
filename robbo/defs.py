@@ -3,7 +3,7 @@
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of GNU General Public License as published by the
-# Free Software Foundation; imageseither version 3 of the license, or (at your
+# Free Software Foundation; either version 3 of the license, or (at your
 # opinion) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -17,11 +17,14 @@ EAST = 0
 SOUTH = 1
 WEST = 2
 
+# Cell size
+SIZE = 32
+
 # Robbo steps
-STEPS = (32, 0), (0, 32), (-32, 0), (0, -32)
+STEPS = (SIZE, 0), (0, SIZE), (-SIZE, 0), (0, -SIZE)
 STOP = -1
 
 # Scroll steps
-SCROLL_UP = 8
-SCROLL_DOWN = -8
+SCROLL_UP = SIZE // 4
+SCROLL_DOWN = -SCROLL_UP
 

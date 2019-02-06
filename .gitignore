@@ -16,8 +16,10 @@ __pycache__/
 *.py[cod]
 
 # Distribution / packaging
+build/
 dist/
 sdist/
+*.egg-info
 *.manifest
 *.spec
 

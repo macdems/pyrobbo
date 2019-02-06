@@ -3,7 +3,7 @@
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of GNU General Public License as published by the
-# Free Software Foundation; imageseither version 3 of the license, or (at your
+# Free Software Foundation; either version 3 of the license, or (at your
 # opinion) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -18,6 +18,7 @@ from ..defs import *
 
 from . import Stars
 from .guns import fire_blast
+
 
 @Board.sprite('R')
 class Robbo(pygame.sprite.Sprite):
@@ -47,7 +48,7 @@ class Robbo(pygame.sprite.Sprite):
 
         # Initial position and movement
         self.pos = pos
-        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
+        self.rect = pygame.Rect(SIZE*pos[0], SIZE*pos[1], SIZE, SIZE).move(screen_rect.topleft)
         self.spawn()
         self.active = True
 

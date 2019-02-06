@@ -3,15 +3,16 @@
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of GNU General Public License as published by the
-# Free Software Foundation; imageseither version 3 of the license, or (at your
+# Free Software Foundation; either version 3 of the license, or (at your
 # opinion) any later version.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-import os
 import pygame
+
+from pkg_resources import resource_stream
 
 
 MAGNET_R = 0
@@ -69,22 +70,6 @@ ROBBO_W2 = 55
 ROBBO_N1 = 56
 ROBBO_N2 = 57
 
-# 0 - magnes prawo, 1 - magnes lewo, 2 - szara i 3 - czerwona ściana,
-# 4 - śrubka, 5 - nabój, 6 - krata, 7 - klucz, 8 - bomba, 9 - drzwi,
-# 10 - ?, 11,12 - miś, 13,14 - ptak, 15,16 - kapsuła, 17 - pustka,
-# 18 - krata ślizowa, 20 - życie, 21,22,23 - zniknięcie, 24 - trawa,
-# 25 - zielona ściana, 26,27 - diabełek, 28,29 - oczy,
-# 30,31 - strzał poziomy i 32,33 - pionowy, 34 - śrubek, 35 - życia,
-# 36 - kluczy, 37 - strzałów, 38 - poziom, 39 - bariera1,
-# 40,41 - teleport, 42,43,44 - gruby strzał, 45,46,47,48 - działko,
-# 49 - bariera, 50,51 - Robbo E, 52,53 - Robbo S, 54,55 - Robbo W,
-# 56,57 - Robbo N
-# 18 - krata ślizowa, 20 - życie, 21,22,23 - zniknięcie, 24 - trawa,
-# 25 - zielona ściana, 26,27 - diabełek, 28,29 - oczy,
-# 30,31 - strzał poziomy i 32,33 - pionowy, 39 - bariera1,
-# 40,41 - teleport, 42,43,44 - gruby strzał, 45,46,47,48 - działko,
-# 49 - bariera2,
-
 
 class Images(object):
     """
@@ -94,8 +79,8 @@ class Images(object):
     """
 
     def __init__(self, skin='default'):
-        self.image = pygame.image.load(os.path.join('skins', skin, 'icons.png')).convert_alpha()
-        self.digits = pygame.image.load(os.path.join('skins', skin, 'digits.png')).convert_alpha()
+        self.image = pygame.image.load(resource_stream('robbo', 'skins/'+skin+'/icons.png')).convert_alpha()
+        self.digits = pygame.image.load(resource_stream('robbo', 'skins/'+skin+'/digits.png')).convert_alpha()
 
     def _get_icon_rect(self, n):
         """

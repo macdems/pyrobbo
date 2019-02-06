@@ -3,7 +3,7 @@
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of GNU General Public License as published by the
-# Free Software Foundation; imageseither version 3 of the license, or (at your
+# Free Software Foundation; either version 3 of the license, or (at your
 # opinion) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -15,6 +15,8 @@ import pygame
 
 from .. import game, screen, images, sounds
 from ..board import Board, rectcollide
+from ..defs import *
+
 from . import Sprite, BlinkingSprite, Stars, explode
 from .guns import Gun, hit
 from .static import Grass
@@ -57,7 +59,7 @@ class Bomb(Sprite):
 
     def hit(self):
         sounds.bomb.play()
-        rects = [self.rect.move((x, y)) for x in (-32, 0, 32) for y in (-32, 0, 32) if x != 0 or y != 0]
+        rects = [self.rect.move((x, y)) for x in (-SIZE, 0, SIZE) for y in (-SIZE, 0, SIZE) if x != 0 or y != 0]
         rect = self.rect.inflate(64, 64)
         explode(self)
         hits = rectcollide(rect, game.board.sprites)
@@ -182,7 +184,7 @@ class Surprise(Sprite):
                     ))
                     self.kill()
                     if choice is not None:
-                        pos = self.rect.left // 32 - 2, self.rect.top // 32 - 1
+                        pos = self.rect.left // SIZE - 2, self.rect.top // SIZE - 1
                         sprite = choice(pos)
                         game.board.add_sprite(sprite)
                         if isinstance(sprite, Screw):

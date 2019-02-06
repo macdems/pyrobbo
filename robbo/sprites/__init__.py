@@ -3,7 +3,7 @@
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of GNU General Public License as published by the
-# Free Software Foundation; imageseither version 3 of the license, or (at your
+# Free Software Foundation; either version 3 of the license, or (at your
 # opinion) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -13,6 +13,7 @@
 import pygame
 
 from .. import game, screen, screen_rect, images
+from ..defs import SIZE
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -22,7 +23,7 @@ class Sprite(pygame.sprite.Sprite):
         super(Sprite, self).__init__()
         if self.IMAGE is not None:
             self.image = game.images.get_icon(self.IMAGE)
-        self.rect = pygame.Rect(32*pos[0], 32*pos[1], 32, 32).move(screen_rect.topleft)
+        self.rect = pygame.Rect(SIZE*pos[0], SIZE*pos[1], SIZE, SIZE).move(screen_rect.topleft)
 
 
 class BlinkingSprite(Sprite):
