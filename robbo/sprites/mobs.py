@@ -53,7 +53,7 @@ class Bird(Mob):
     SHOOT_FREQUENCY = 6
 
     def __init__(self, pos, dir=0, shooting_dir=0, shooting=0):
-        super(Bird, self).__init__(pos, SOUTH if dir else WEST)
+        super(Bird, self).__init__(pos, dir)
         self.shooting = shooting
         self.shooting_dir = shooting_dir
 
