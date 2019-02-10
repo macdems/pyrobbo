@@ -115,7 +115,8 @@ class Screw(Sprite):
 
     def collect(self):
         """Funkcja wywoływana przy zebraniu klucza"""
-        game.status.parts -= 1
+        if game.status.parts > 0:
+            game.status.parts -= 1
         game.status.update()
         # Gramy dźwięk
         sounds.screw.play()
