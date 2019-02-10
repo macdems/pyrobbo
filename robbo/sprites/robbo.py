@@ -47,10 +47,11 @@ class Robbo(pygame.sprite.Sprite):
         )
 
         # Initial position and movement
+        self.active = True
         self.pos = pos
         self.rect = pygame.Rect(SIZE*pos[0], SIZE*pos[1], SIZE, SIZE).move(screen_rect.topleft)
+        sounds.spawn.play()
         self.spawn()
-        self.active = True
 
         game.robbo = self
 
