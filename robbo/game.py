@@ -14,7 +14,7 @@ import sys
 
 import pygame
 from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, K_l, \
-    KEYUP, K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META
+    KEYUP, K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL
 
 from .defs import *
 
@@ -41,6 +41,10 @@ MOVES = {
     K_RIGHT: EAST
 }
 
+SCROLLS = {
+    K_UP: SCROLL_UP,
+    K_DOWN: SCROLL_DOWN
+}
 
 class EndLevel(Exception):
     """End level exception"""
@@ -93,7 +97,7 @@ def play_level(level):
     status.update()
 
     scrolling = 0       # are we scrolling?
-    scrolldir = 0       # scrolling direction
+    scroll_step = 0       # scrolling direction
 
     # Draw static sprites
     board.sprites.draw(screen)
@@ -150,12 +154,15 @@ def play_level(level):
                 mods = pygame.key.get_mods()
                 if event.key in MOVES:
                     move = MOVES[event.key]
-                    if mods & KMOD_SHIFT:
+                    if mods & KMOD_CTRL:
+                        if event.key in SCROLLS:
+                            scrolling = True
+                            scroll_step = SCROLLS[event.key]
+                    elif mods & KMOD_SHIFT:
                         robbo.fire(move)
                         move = None
                     else:
                         robbo.move_key(move)
-                        robbo_moved = NORTH
                 # system keys
                 elif event.key == K_f:
                      pygame.display.toggle_fullscreen()
@@ -170,22 +177,36 @@ def play_level(level):
                     robbo.die()
                 elif event.key == K_q and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
                     sys.exit(0)
-            elif event.type == KEYUP and event.key in MOVES:
-                if MOVES[event.key] == robbo.walking:
+            elif event.type == KEYUP:
+                if MOVES.get(event.key) == robbo.walking:
                     if move: robbo.update()
                     robbo.move_key(STOP)
+                elif event.key in (K_LCTRL, K_RCTRL):
+                    scrolling = 0
+                if scrolling is True and SCROLLS.get(event.key) == scroll_step:
+                    if pygame.key.get_mods() & KMOD_CTRL:
+                        scrolling = False
+                    else:
+                        scrolling = 0
         pygame.event.pump()
 
         # Check if scrolling is needed
-        if robbo.rect.top < screen_rect.top+64 and board.scroll_offset[1] < 0:
-            scrolling = 3; scrolldir = SCROLL_UP
-        elif robbo.rect.bottom > screen_rect.bottom-64 and board.rect.bottom > screen_rect.height+32:
-            scrolling = 3; scrolldir = SCROLL_DOWN
-        elif scrolling:
-            if board.scroll_offset[1] < 0 and board.rect.bottom > screen_rect.height+32:
-                scrolling -= 1
-            else:
-                scrolling = 0
+        if scrolling and (
+                (board.scroll_offset[1] >= 0 and scroll_step == SCROLL_UP) or
+                (board.rect.bottom <= screen_rect.height + SIZE and scroll_step == SCROLL_DOWN)
+        ):
+            scrolling = False if scrolling is True else 0
+        else:
+            if robbo.rect.top < screen_rect.top + 2*SIZE and board.scroll_offset[1] < 0:
+                if not isinstance(scrolling, bool):
+                    scrolling = 3; scroll_step = SCROLL_UP
+            elif robbo.rect.bottom > screen_rect.bottom - 2*SIZE and board.rect.bottom > screen_rect.height+SIZE:
+                if not isinstance(scrolling, bool):
+                    scrolling = 3; scroll_step = SCROLL_DOWN
+            elif scrolling and scrolling is not True:
+                    scrolling -= 1
+
+        # print(scrolling)
 
         update_sprites(False)
 
@@ -209,9 +230,9 @@ def play_level(level):
             for _ in range(4):
                 for sprite in board.sprites.sprites():
                     screen.blit(board.background, sprite.rect, sprite.rect)
-                    sprite.rect.move_ip(0, scrolldir)
-                board.scroll_offset[1] += scrolldir    # decide current offset
-                board.rect.move_ip(0, scrolldir)
+                    sprite.rect.move_ip(0, scroll_step)
+                board.scroll_offset[1] += scroll_step    # decide current offset
+                board.rect.move_ip(0, scroll_step)
                 board.sprites.draw(screen)
                 pygame.display.flip()
                 clock.tick(clock_speed*4)
