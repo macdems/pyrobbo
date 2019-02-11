@@ -62,6 +62,7 @@ class Robbo(pygame.sprite.Sprite):
         self.step = [0, 0]
         self.walking = STOP
         self._spawning = len(self.spawn_images)
+        self.image = self.spawn_images[-1]
 
     def update(self):
         """Uaktualnienie bieżącego stanu robocika"""

@@ -131,7 +131,7 @@ class Bullet(Sprite):
     GROUPS = 'collect',
 
     def collect(self):
-        game.status.bullets += 10
+        game.status.bullets += 9
         game.status.update()
         sounds.bullet.play()
 
