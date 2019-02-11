@@ -121,7 +121,7 @@ class Barrier(BlinkingSprite):
     GROUPS = 'blast', 'fragile'
     UPDATE_TIME = 2
 
-    def __init__(self, pos, dir):
+    def __init__(self, pos, dir=0):
         super(Barrier, self).__init__(pos)
         self.dir = dir
 

@@ -46,6 +46,7 @@ SCROLLS = {
     K_DOWN: SCROLL_DOWN
 }
 
+
 class EndLevel(Exception):
     """End level exception"""
     pass

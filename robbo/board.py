@@ -65,8 +65,7 @@ class Board(object):
         self.size = level['size']
         self.rect = pygame.Rect(screen_rect.topleft, (32 * self.size[0], 32 * self.size[1]))
 
-        color = bytes.fromhex(level.get('colour', '404080'))
-        self.background.fill(color)
+        self.background.fill(bytes.fromhex(level.get('colour', '404080')))
         screen.blit(self.background, screen_rect)
 
         additional = {}
