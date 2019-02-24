@@ -10,6 +10,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import sys
 import pygame
 
 from .defs import *
@@ -23,6 +24,11 @@ screen_rect = None
 
 
 skin = 'default'
+
+try:
+    levels = sys.argv[1]
+except IndexError:
+    levels = 'original'
 
 
 def main():
@@ -39,7 +45,7 @@ def main():
 
     from . import game
 
-    load_levels()
+    load_levels(levels)
     level = 0
     try:
         while level < len(game.levels):

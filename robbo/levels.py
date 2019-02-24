@@ -20,7 +20,10 @@ file_section_re = re.compile('\[(\w+)\]\s*')
 def load_levels(name='original'):
     from . import game
     game.levels = []
-    source = resource_string('robbo', 'levels/'+name+'.dat').decode('utf8')
+    try:
+        source = open(name).read()
+    except FileNotFoundError:
+        source = resource_string('robbo', 'levels/'+name+'.dat').decode('utf8')
     level = {}
     section = None
     data = ''
