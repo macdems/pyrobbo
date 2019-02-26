@@ -66,26 +66,42 @@ class Bird(Mob):
                 fire_blast(self, self.shooting_dir)
 
 
-@Board.sprite('@')
-class Bear(Mob):
-    IMAGES = images.BEAR1, images.BEAR2
+class Walker(Mob):
+    turn = 0
 
     def move(self):
-        self.dir = (self.dir - 1) % 4
+        dir0 = self.dir
+        rect0 = self.rect
+        self.dir = (self.dir - self.turn) % 4
+        if self.try_step(STEPS[self.dir]):
+            # Test if we circle stupidly in an empty space
+            if self.rect == rect0:  # waiting for a gun
+                return
+            dir1 = self.dir
+            rect1 = self.rect
+            for _ in range(2):
+                dir1 = (dir1 - self.turn) % 4
+                rect1 = rect1.move(STEPS[dir1])
+                if not game.board.can_move(rect1):
+                    return
+            self.rect = rect0
+            self.dir = dir0
         for _ in range(4):
-            if self.try_step(STEPS[self.dir]): break
-            self.dir = (self.dir + 1) % 4
+            if self.try_step(STEPS[self.dir]):
+                break
+            self.dir = (self.dir + self.turn) % 4
+
+
+@Board.sprite('@')
+class Bear(Walker):
+    IMAGES = images.BEAR1, images.BEAR2
+    turn = +1
 
 
 @Board.sprite('*')
-class Devil(Mob):
+class Devil(Walker):
     IMAGES = images.DEVIL1, images.DEVIL2
-
-    def move(self):
-        self.dir = (self.dir + 1) % 4
-        for _ in range(4):
-            if self.try_step(STEPS[self.dir]): break
-            self.dir = (self.dir - 1) % 4
+    turn = -1
 
 
 @Board.sprite('V')
