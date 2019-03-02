@@ -62,9 +62,6 @@ class Board(object):
         """
         Load and init level data
         """
-        self.size = level['size']
-        self.rect = pygame.Rect(screen_rect.topleft, (32 * self.size[0], 32 * self.size[1]))
-
         try:
             self.background.fill(bytes.fromhex(level.get('colour', '404080')))
         except (TypeError, ValueError):
@@ -72,27 +69,25 @@ class Board(object):
 
         screen.blit(self.background, screen_rect)
 
-        additional = {}
-
-        for item in level['additional'].splitlines()[1:]:
-            data = item.split('.')
-            p = tuple(int(n) for n in data[:2])
-            t = data[2]
-            data = [int(n) for n in data[3:]]
-            additional.setdefault(t, {})[p] = data
+        additional = level['additional']
 
         tgs = {}
         for g, n in additional.get('&', {}).values():
-            tgs[g-1] = max(n+1, tgs.get(g-1, 0))
-        self.teleports = [[None] * tgs[g] for g in range(len(tgs))]
+            tgs[g] = max(n+1, tgs.get(g, 0))
+        self.teleports = dict((g, [None] * tgs[g]) for g in tgs)
 
+        mx = 0
         for y, row in enumerate(level['data'].splitlines()):
             for x, c in enumerate(row):
+                mx = max(mx, x)
                 p = x, y
                 data = additional.get(c, {}).get(p, ())
                 Sprite = self.symbols.get(c)
                 if Sprite is not None:
                     self.add_sprite(Sprite(p, *data))
+
+        self.size = mx+1, y+1
+        self.rect = pygame.Rect(screen_rect.topleft, (32 * self.size[0], 32 * self.size[1]))
 
         self.chain = []
 

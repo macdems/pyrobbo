@@ -30,7 +30,7 @@ class Teleport(BlinkingSprite):
     def __init__(self, pos, group=None, no=None):
         super(Teleport, self).__init__(pos)
         if group is not None:
-            self.group = group-1
+            self.group = group
             self.no = no
             game.board.teleports[self.group][no] = self
         else:

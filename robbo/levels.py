@@ -17,6 +17,22 @@ from pkg_resources import resource_string
 file_section_re = re.compile('\[(\w+)\]\s*')
 
 
+# List of symbols with descriptions
+RICH = '&@*^}LlM=,'
+
+_TRANS = {'E': 0, 'S': 1, 'W': 2, 'N': 3, '*': 1, '.': 0}
+
+
+def trans(i):
+    try:
+        return _TRANS[i]
+    except KeyError:
+        try:
+            return int(i)
+        except ValueError:
+            return i
+
+
 def load_levels(name='original'):
     from . import game
     game.levels = []
@@ -27,22 +43,48 @@ def load_levels(name='original'):
     level = {}
     section = None
     data = ''
-    for line in source.splitlines():
-        if not line.strip() or line.startswith('#'): continue
-        m = file_section_re.match(line)
-        if m is not None:
-            s = m.group(1)
-            if section is not None:
-                level[section] = data.rstrip()
-            data = ''
-            if s == 'end':
-                level['size'] = tuple(int(n) for n in level['size'].split('.'))
-                if 'screws' in level:
-                    level['screws'] = int(level['screws'])
-                game.levels.append(level)
-                level = {}
-                section = None
+    for lineno, line in enumerate(source.splitlines()):
+        try:
+            if not line.strip() or line.startswith('#'): continue
+            m = file_section_re.match(line)
+            if m is not None:
+                s = m.group(1)
+                if section is not None:
+                    level[section] = data.rstrip()
+                data = ''
+                if s == 'end':
+                    if 'screws' in level:
+                        level['screws'] = int(level['screws'])
+                    additional = {}
+                    if 'additional' in level:
+                        for item in level['additional'].splitlines()[1:]:
+                            data = item.split('.')
+                            p = tuple(int(n) for n in data[:2])
+                            t = data[2]
+                            data = tuple(int(n) for n in data[3:])
+                            additional.setdefault(t, {})[p] = data
+                    else:
+                        rows = []
+                        for y, row in enumerate(level['data'].splitlines()):
+                            row, *info = row.split()
+                            rows.append(row)
+                            for x, c in enumerate(row):
+                                if c in RICH:
+                                    p = x, y
+                                    for n,val in enumerate(info):
+                                        if val.startswith(c): break
+                                    else:
+                                        raise ValueError("No info for {} in row {}".format(c, y))
+                                    data = tuple(trans(i) for i in info.pop(n)[1:])
+                                    additional.setdefault(c, {})[p] = data
+                        level['data'] = '\n'.join(rows)
+                    level['additional'] = additional
+                    game.levels.append(level)
+                    level = {}
+                    section = None
+                else:
+                    section = s
             else:
-                section = s
-        else:
-            data += line + '\n'
+                data += line + '\n'
+        except Exception as err:
+            raise type(err)("line {}: {}".format(lineno, str(err)))
