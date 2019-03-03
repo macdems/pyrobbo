@@ -10,7 +10,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-import sys
+import argparse
 import pygame
 
 from .defs import *
@@ -23,13 +23,16 @@ screen = None
 screen_rect = None
 
 
-skin = 'default'
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--fullscreen', help="start in fullscreen", action='store_true')
+parser.add_argument('-s', '--skin', help="selected skin set", type=str, default="default")
+parser.add_argument("levelset", help="name of the level set to load", nargs='?', default="original")
+args = parser.parse_args()
 
-try:
-    levels = sys.argv[1]
-except IndexError:
-    levels = 'original'
+skin = args.skin
+levels = args.levelset
 
+flags = pygame.FULLSCREEN if args.fullscreen else 0
 
 def main():
     pygame.init()
@@ -40,7 +43,7 @@ def main():
     global clock, clock_speed, screen, screen_rect
     clock = pygame.time.Clock()
     clock_speed = 8
-    screen = pygame.display.set_mode((640, 480))
+    screen = pygame.display.set_mode((640, 480), flags)
     screen_rect = pygame.Rect((64, 32), (512, 384))
 
     from . import game

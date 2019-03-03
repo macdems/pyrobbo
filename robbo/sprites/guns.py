@@ -32,7 +32,7 @@ def hit(rect, old=None):
                     hit.kill()
                     screen.blit(game.board.background, hit.rect, hit.rect)
                     game.board.add_sprite(Stars(hit.rect))
-            elif old != None:
+            elif old is not None:
                     game.board.add_sprite(Stars(old))
         return True
     else:
