@@ -59,25 +59,15 @@ class SelectLevel(Exception):
         self.level = level
 
 
-def cleanup_sprites():
-    for sprite in board.sprites_blast.sprites():
-        screen.blit(board.background, sprite.rect, sprite.rect)
-    for sprite in board.sprites_update.sprites():
-        screen.blit(board.background, sprite.rect, sprite.rect)
-    screen.blit(board.background, robbo.rect, robbo.rect)
-
-
-def update_sprites(cleanup=True):
-    if cleanup:
-        cleanup_sprites()
+def update_sprites():
     board.sprites_update.update()
     board.sprites_blast.update()
 
 
 def draw_sprites():
-    robbo.draw(screen)
-    board.sprites_blast.draw(screen)
-    board.sprites_update.draw(screen)
+    screen.blit(board.background, board.rect, board.rect)
+    board.sprites.draw(screen)
+    pygame.display.flip()
 
 
 def play_level(level):
@@ -110,7 +100,7 @@ def play_level(level):
             for _ in range(6):
                 update_sprites()
                 draw_sprites()
-                pygame.display.flip()
+
                 clock.tick(clock_speed)
             # Cleanup board
             sounds.die.play()
@@ -118,8 +108,7 @@ def play_level(level):
                 explode(sprite)
             while board.sprites:
                 update_sprites()
-                board.sprites_update.draw(screen)
-                pygame.display.flip()
+                draw_sprites()
                 clock.tick(clock_speed)
             # Wait
             for _ in range(6):
@@ -141,8 +130,6 @@ def play_level(level):
         board.chain = []
         for item in chain:
             item.chain()
-
-        cleanup_sprites()
 
         move = None
 
@@ -209,7 +196,7 @@ def play_level(level):
 
         # print(scrolling)
 
-        update_sprites(False)
+        update_sprites()
 
         try:
             robbo.update()
@@ -234,12 +221,10 @@ def play_level(level):
                     sprite.rect.move_ip(0, scroll_step)
                 board.scroll_offset[1] += scroll_step    # decide current offset
                 board.rect.move_ip(0, scroll_step)
-                board.sprites.draw(screen)
-                pygame.display.flip()
+                draw_sprites()
                 clock.tick(clock_speed*4)
         else:
             # Draw moving sprites
             draw_sprites()
-            pygame.display.flip()
             clock.tick(clock_speed)
 
