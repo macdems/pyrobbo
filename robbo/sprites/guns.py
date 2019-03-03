@@ -30,7 +30,6 @@ def hit(rect, old=None):
                 else:
                     sounds.blaster.play()
                     hit.kill()
-                    screen.blit(game.board.background, hit.rect, hit.rect)
                     game.board.add_sprite(Stars(hit.rect))
             elif old is not None:
                     game.board.add_sprite(Stars(old))
@@ -73,8 +72,10 @@ class ShortBlast(pygame.sprite.Sprite):
 
 
 def fire_blast(source, dir, icon=None):
-    blast = ShortBlast(source.rect, dir, icon)
-    game.board.add_sprite(blast)
+    testrect = source.rect.move(STEPS[dir])
+    if not hit(testrect):
+        blast = ShortBlast(source.rect, dir, icon)
+        game.board.add_sprite(blast)
 
 
 class LongBlast(pygame.sprite.Sprite):
@@ -121,14 +122,12 @@ class LongBlast(pygame.sprite.Sprite):
         elif self._end is not None:
             if self._end == 0:
                 self.kill()
-                screen.blit(game.board.background, self.rect, self.rect)
                 self._prev.blasting = False
             self._end -= 1
 
     def chain(self):
         if isinstance(self._prev, LongBlast):
             self.kill()
-            screen.blit(game.board.background, self.rect, self.rect)
             game.board.chain.append(self._prev)
         elif isinstance(self._prev, Gun):
             self._images = tuple(game.images.get_icon(i) for i in self.END_IMAGES)

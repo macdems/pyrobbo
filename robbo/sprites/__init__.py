@@ -88,7 +88,6 @@ class Stars(pygame.sprite.Sprite):
 def explode(target):
     if not isinstance(target, Stars):
         target.kill()
-        screen.blit(game.board.background, target.rect, target.rect)
         game.board.add_sprite(Stars(target.rect))
 
 

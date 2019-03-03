@@ -196,5 +196,4 @@ class Surprise(Sprite):
 
     def hit(self):
         self.kill()
-        screen.blit(game.board.background, self.rect, self.rect)
         game.board.add_sprite(self.Spawn(self.rect))

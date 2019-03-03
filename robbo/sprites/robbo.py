@@ -101,7 +101,6 @@ class Robbo(pygame.sprite.Sprite):
                 if collected:
                     for item in collected:
                         item.collect()
-                        screen.blit(game.board.background, item.rect, item.rect)
                         item.kill()
 
                 # Do we open the door?

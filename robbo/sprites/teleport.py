@@ -68,7 +68,6 @@ class Teleport(BlinkingSprite):
             dest = game.robbo
 
         # Move Robbo
-        screen.blit(game.board.background, game.robbo.rect, game.robbo.rect)
         game.robbo.rect = dest.rect.move(step)
 
         # Make appear stars

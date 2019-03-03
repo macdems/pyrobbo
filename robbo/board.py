@@ -99,7 +99,6 @@ class Board(object):
 
     def move_sprite(self, sprite, step):
         """Przesuwa sprite o dany krok"""
-        screen.blit(game.board.background, sprite.rect, sprite.rect)
         sprite.rect.move_ip(step)
         screen.blit(sprite.image, sprite.rect)
 
