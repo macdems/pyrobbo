@@ -44,7 +44,7 @@ class SlideBox(Sprite):
     def update(self):
         if self._step is not None:
             newrect = self.rect.move(self._step)
-            if hit(newrect):
+            if hit(newrect) or not game.board.rect.contains(newrect):
                 self._step = None
             else:
                 self.rect = newrect

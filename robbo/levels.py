@@ -45,7 +45,7 @@ def load_levels(name='original'):
     data = ''
     for lineno, line in enumerate(source.splitlines()):
         try:
-            if not line.strip() or line.startswith('#'): continue
+            if not line.strip() or (line.startswith('#') and section != 'data'): continue
             m = file_section_re.match(line)
             if m is not None:
                 s = m.group(1)

@@ -20,7 +20,7 @@ from ..defs import *
 from . import Sprite, Stars
 
 
-def hit(rect):
+def hit(rect, old=None):
     hits = rectcollide(rect, game.board.sprites)
     if hits:
         for hit in hits:
@@ -32,6 +32,8 @@ def hit(rect):
                     hit.kill()
                     screen.blit(game.board.background, hit.rect, hit.rect)
                     game.board.add_sprite(Stars(hit.rect))
+            elif old != None:
+                    game.board.add_sprite(Stars(old))
         return True
     else:
         return False
@@ -61,7 +63,7 @@ class ShortBlast(pygame.sprite.Sprite):
 
     def update(self):
         newrect = self.rect.move(STEPS[self.dir])
-        if not game.board.rect.contains(newrect) or hit(newrect):
+        if not game.board.rect.contains(newrect) or hit(newrect, self.rect):
             self.kill()
             return
         self.rect = newrect
