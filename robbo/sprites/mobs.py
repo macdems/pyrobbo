@@ -74,18 +74,19 @@ class Walker(Mob):
         rect0 = self.rect
         self.dir = (self.dir - self.turn) % 4
         if self.try_step(STEPS[self.dir]):
-            # Test if we circle stupidly in an empty space
-            if self.rect == rect0:  # waiting for a gun
-                return
-            dir1 = self.dir
-            rect1 = self.rect
-            for _ in range(2):
-                dir1 = (dir1 - self.turn) % 4
-                rect1 = rect1.move(STEPS[dir1])
-                if not game.board.can_move(rect1):
-                    return
-            self.rect = rect0
-            self.dir = dir0
+            return
+            # # Test if we circle stupidly in an empty space
+            # if self.rect == rect0:  # waiting for a gun
+            #     return
+            # dir1 = self.dir
+            # rect1 = self.rect
+            # for _ in range(2):
+            #     dir1 = (dir1 - self.turn) % 4
+            #     rect1 = rect1.move(STEPS[dir1])
+            #     if not game.board.can_move(rect1):
+            #         return
+            # self.rect = rect0
+            # self.dir = dir0
         for _ in range(4):
             if self.try_step(STEPS[self.dir]):
                 break
