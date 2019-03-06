@@ -44,7 +44,7 @@ class Board(object):
         self.sprites_mob = pygame.sprite.Group()            # mobs
         self.sprites_durable = pygame.sprite.Group()        # durable sprite
         self.sprites_fragile = pygame.sprite.Group()        # destroyed on hit
-        self.sprites_blast = pygame.sprite.Group()          # blasts
+        self.sprites_blast = pygame.sprite.Group()          # blast
         self.teleports = []
         self.scroll_offset = [0, 0]
         self.background = pygame.Surface(screen.get_size())

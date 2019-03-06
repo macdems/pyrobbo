@@ -63,7 +63,7 @@ class Stars(pygame.sprite.Sprite):
     """
     Teleport and die stars
     """
-    GROUPS = 'update', 'durable'
+    GROUPS = 'blast', 'durable'
     UPDATE_TIME = 1
 
     def __init__(self, rect):

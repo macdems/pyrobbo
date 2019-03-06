@@ -40,12 +40,16 @@ class SlideBox(Sprite):
 
     def push(self, step):
         self._step = step
+        game.board.sprites_blast.add(self)
+        game.board.sprites_update.remove(self)
 
     def update(self):
         if self._step is not None:
             newrect = self.rect.move(self._step)
             if hit(newrect) or not game.board.rect.contains(newrect):
                 self._step = None
+                game.board.sprites_blast.remove(self)
+                game.board.sprites_update.add(self)
             else:
                 self.rect = newrect
 
