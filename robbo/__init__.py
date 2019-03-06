@@ -26,6 +26,7 @@ screen_rect = None
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--fullscreen', help="start in fullscreen", action='store_true')
 parser.add_argument('-s', '--skin', help="selected skin set", type=str, default="default")
+parser.add_argument('-b', '--bears', help="prevent bears from stupidly circling around", action='store_true')
 parser.add_argument("levelset", help="name of the level set to load", nargs='?', default="original")
 args = parser.parse_args()
 
@@ -33,6 +34,7 @@ skin = args.skin
 levels = args.levelset
 
 flags = pygame.FULLSCREEN if args.fullscreen else 0
+
 
 def main():
     pygame.init()
@@ -47,6 +49,8 @@ def main():
     screen_rect = pygame.Rect((64, 32), (512, 384))
 
     from . import game
+
+    game.clever_bears = args.bears
 
     load_levels(levels)
     level = 0

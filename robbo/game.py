@@ -34,6 +34,9 @@ from .status import Status
 from .sprites import explode
 
 
+clever_bears = False
+
+
 MOVES = {
     K_UP: NORTH,
     K_DOWN: SOUTH,
