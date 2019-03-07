@@ -147,8 +147,8 @@ Janusz Pelc
 level_notes relating to this level can go here.
 [data]
 QQQQQQQQQQQQQQQQ
-QR.............Q
-Q..@...........Q
+QR............TQ
+Q....@.........Q
 Q..............Q
 Q..............Q
 Q..............Q
@@ -158,7 +158,7 @@ Q..............Q
 Q..............Q
 Q..............Q
 Q..............Q
-Q..............Q
+Q!.............Q
 QQQQQQQQQQQQQQQQ
 [additional]
 [end]

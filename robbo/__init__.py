@@ -151,27 +151,37 @@ def main():
     from . import game
     game.clever_bears = config.get('cleverbears', False)
 
-    game.levels = load_levels(levelset)
-    while level < len(game.levels):
+    while True:
         try:
-            levels[levelset] = level
-            game.play_level(level)
-        except game.SelectLevel as selected:
-            if selected.level < len(game.levels):
-                level = selected.level
-        except game.ChangeLevelSet:
-            selected = select_levelset()
-            if selected != levelset:
-                try:
-                    newlevels = load_levels(selected)
-                except:
-                    import traceback
-                    traceback.print_exc()
-                    level_sets.remove(selected)
-                else:
-                    levelset = selected
-                    level = levels.get(levelset, 0)
-                    game.levels = newlevels
+            game.levels = load_levels(levelset)
+        except:
+            import traceback
+            traceback.print_exc()
+            li = level_sets.index(levelset)
+            del level_sets[li]
+            levelset = level_sets[li % len(level_sets)]
         else:
-            level += 1
+            while level < len(game.levels):
+                try:
+                    levels[levelset] = level
+                    game.play_level(level)
+                except game.SelectLevel as selected:
+                    if selected.level < len(game.levels):
+                        level = selected.level
+                except game.ChangeLevelSet:
+                    selected = select_levelset()
+                    if selected != levelset:
+                        try:
+                            newlevels = load_levels(selected)
+                        except:
+                            import traceback
+                            traceback.print_exc()
+                            level_sets.remove(selected)
+                        else:
+                            levelset = selected
+                            level = levels.get(levelset, 0)
+                            game.levels = newlevels
+                else:
+                    level += 1
+            levelset = level_sets[(level_sets.index(levelset) + 1) % len(level_sets)]
 
