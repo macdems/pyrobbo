@@ -69,7 +69,7 @@ def select_levelset():
         level = level_sets.index('original')
 
     while True:
-        text = font.render(level_sets[level].upper(), 0, (255, 255, 255))
+        text = font.render(os.path.basename(level_sets[level]).upper(), 0, (255, 255, 255))
         screen.fill((0, 0, 0), rect)
         w = text.get_width()
         screen.blit(text, (X + (W-w)//2, Y))
@@ -117,6 +117,7 @@ def main():
     screen = pygame.display.set_mode((640, 480), flags)
     screen_rect = pygame.Rect((64, 32), (512, 384))
 
+    levels = config.get('levels', {})
     level_sets = set(dat[:-4] for dat in resource_listdir('robbo', 'levels') if dat.endswith('.dat'))
     for data_dir in DATA_DIRS:
         try:
@@ -124,7 +125,9 @@ def main():
         except FileNotFoundError:
             continue
     level_sets |= set(dat[:-4] for dat in os.listdir('.') if dat.endswith('.dat'))
-
+    for level in levels:
+        if os.path.exists(level+'.dat'):
+            level_sets.add(level)
     if args.levelset in level_sets:
         levelset = args.levelset
     elif args.levelset is not None and args.levelset.endswith('.dat'):
@@ -135,7 +138,6 @@ def main():
     level_sets = list(level_sets)
     level_sets.sort()
     level = config.get('levels', {}).get(levelset, 0)
-    levels = config.get('levels', {})
 
     from . import game
     game.clever_bears = config.get('cleverbears', False)
