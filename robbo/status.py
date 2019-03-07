@@ -14,7 +14,7 @@ import sys
 
 import pygame
 
-from . import screen, game, images
+from . import screen, game, images, quit
 
 
 class Status(object):
@@ -86,7 +86,7 @@ class Status(object):
         while True:
             event = pygame.event.wait()
             if event.type == pygame.QUIT:
-                sys.exit(0)
+                quit()
             elif event.type == pygame.KEYDOWN:
                 if pygame.K_0 <= event.key <= pygame.K_9:
                     n = event.key - pygame.K_0

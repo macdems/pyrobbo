@@ -14,7 +14,7 @@ import re
 from pkg_resources import resource_string
 
 
-file_section_re = re.compile('\[(\w+)\]\s*')
+file_section_re = re.compile(r'\[(\w+)\]\s*')
 
 
 # List of symbols with descriptions

@@ -13,8 +13,8 @@
 import sys
 
 import pygame
-from pygame.constants import QUIT, KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_f, K_q, K_x, K_l, \
-    KEYUP, K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL
+from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_RETURN, K_b, K_f, K_q, K_x, K_l, \
+    K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL
 
 from .defs import *
 
@@ -25,7 +25,7 @@ board = None
 robbo = None
 capsule = None
 
-from . import screen, screen_rect, clock, clock_speed, skin, sounds
+from . import screen, screen_rect, clock, clock_speed, skin, sounds, quit
 from .board import Board
 from .images import Images
 from .status import Status
@@ -35,6 +35,9 @@ from .sprites import explode
 
 
 clever_bears = False
+
+level_sets = ['original']
+levelset = 0
 
 
 MOVES = {
@@ -56,10 +59,44 @@ class EndLevel(Exception):
 
 
 class SelectLevel(Exception):
-    """level selected exception"""
-    
+    """Level selected exception"""
     def __init__(self, level):
         self.level = level
+
+
+class LoadLevelSet(Exception):
+    """Load levels exception"""
+    def __init__(self, index=None):
+        self.index = index
+
+
+def select_levelset():
+    screen.set_clip(screen.get_rect())
+    X, Y, W, H = 64, 432, 512, 32
+    rect = pygame.Rect(X, Y, W, H)
+
+    font = pygame.font.Font(None, 48)
+
+    level = levelset
+
+    while True:
+        text = font.render(level_sets[level].upper(), 0, (255, 255, 255))
+        screen.fill((0, 0, 0), rect)
+        w = text.get_width()
+        screen.blit(text, (X + (W-w)//2, Y))
+        pygame.display.flip()
+        event = pygame.event.wait()
+        if event.type == pygame.QUIT:
+            quit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                level = (level - 1) % len(level_sets)
+            if event.key == pygame.K_DOWN:
+                level = (level + 1) % len(level_sets)
+            if event.key == K_RETURN:
+                screen.fill((0, 0, 0), rect)
+                return level
+        pygame.event.pump()
 
 
 def update_sprites():
@@ -77,7 +114,7 @@ def play_level(level):
     """The game loop"""
     pygame.mouse.set_visible(0)
 
-    global clock_speed
+    global clock_speed, clever_bears
 
     # Init global game objects
     global images, status, board
@@ -139,7 +176,7 @@ def play_level(level):
         # Process user events
         for event in pygame.event.get():
             if event.type == QUIT:
-                sys.exit(0)
+                quit()
             elif event.type == KEYDOWN:
                 # Robbo moves
                 mods = pygame.key.get_mods()
@@ -157,9 +194,14 @@ def play_level(level):
                 # system keys
                 elif event.key == K_f:
                      pygame.display.toggle_fullscreen()
-                elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
+                elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META):
                     draw_sprites()
-                    raise SelectLevel(status.select_level())
+                    if mods & KMOD_SHIFT:
+                        raise LoadLevelSet(select_levelset())
+                    else:
+                        raise SelectLevel(status.select_level())
+                elif event.key == K_b and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META | KMOD_SHIFT):
+                    clever_bears = not clever_bears
                 elif event.key == K_PLUS or event.key == K_EQUALS:
                     clock_speed *= 1.2
                 elif event.key == K_MINUS:
@@ -167,7 +209,7 @@ def play_level(level):
                 elif event.key == K_x and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
                     robbo.die()
                 elif event.key == K_q and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
-                    sys.exit(0)
+                    quit()
             elif event.type == KEYUP:
                 if MOVES.get(event.key) == robbo.walking:
                     if move: robbo.update()
@@ -210,7 +252,7 @@ def play_level(level):
             fade.convert()
             fade.fill((0,0,0))
             robbo.kill()
-            board.sprites.draw(screen)
+            draw_sprites()
             for i in range(w, -1, -1):
                 screen.blit(fade, (i, 0))
                 clock.tick(300)
@@ -230,4 +272,3 @@ def play_level(level):
             # Draw moving sprites
             draw_sprites()
             clock.tick(clock_speed)
-
