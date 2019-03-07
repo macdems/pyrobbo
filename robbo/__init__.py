@@ -13,7 +13,6 @@
 import sys
 import os
 import argparse
-import appdirs
 import yaml
 from pkg_resources import resource_listdir
 import pygame
@@ -36,10 +35,9 @@ parser_screen.add_argument('-w', '--window', help="start in window", action='sto
 parser.add_argument('-s', '--skin', help="selected skin set", type=str, default="default")
 parser.add_argument("levelset", help="name of the level set to load", nargs='?')
 
-config_file = os.path.join(appdirs.user_config_dir(), 'pyrobbo.yml')
 
 level_sets = ['original']
-levelset = 'default'
+levelset = 'original'
 
 levels = {}
 
@@ -52,7 +50,7 @@ def quit():
         'cleverbears': game.clever_bears,
         'fullscreen': bool(screen.get_flags() & pygame.FULLSCREEN)
     }
-    yaml.dump(config, open(config_file, 'w'), default_flow_style=False)
+    yaml.dump(config, open(CONFIG_FILE, 'w'), default_flow_style=False)
     pygame.quit()
     sys.exit(0)
 
@@ -64,7 +62,10 @@ def select_levelset():
 
     font = pygame.font.Font(None, 48)
 
-    level = level_sets.index(levelset)
+    try:
+        level = level_sets.index(levelset)
+    except ValueError:
+        level = level_sets.index('original')
 
     while True:
         text = font.render(level_sets[level].upper(), 0, (255, 255, 255))
@@ -76,9 +77,9 @@ def select_levelset():
         if event.type == pygame.QUIT:
             quit()
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == K_UP:
                 level = (level - 1) % len(level_sets)
-            if event.key == pygame.K_DOWN:
+            if event.key == K_DOWN:
                 level = (level + 1) % len(level_sets)
             if event.key == K_RETURN:
                 screen.fill((0, 0, 0), rect)
@@ -90,7 +91,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        config = yaml.load(open(config_file, 'r'))
+        config = yaml.load(open(CONFIG_FILE, 'r'))
     except FileNotFoundError:
         config = {}
 
@@ -101,12 +102,11 @@ def main():
     else:
         flags = pygame.FULLSCREEN if config.get('fullscreen', True) else 0
 
-
     pygame.init()
     pygame.display.set_caption('PyRobbo')
-    pygame.key.set_repeat(0, 0)
+    pygame.key.set_repeat(0,0)
 
-    global skin, level_sets, levelset, clock, clock_speed, screen, screen_rect
+    global skin, level_sets, levelset, levels, clock, clock_speed, screen, screen_rect
     skin = args.skin
     clock = pygame.time.Clock()
     clock_speed = 8
@@ -115,20 +115,22 @@ def main():
 
     from . import game
 
-    level_sets = ['original'] + [dat[:-4] for dat in resource_listdir('robbo', 'levels')
-                                 if dat.endswith('.dat') and dat != 'original.dat']
-    level_sets += [dat for dat in os.listdir('.') if dat.endswith('.dat') and dat[:-4] not in level_sets]
+    level_sets = set(dat[:-4] for dat in resource_listdir('robbo', 'levels') if dat.endswith('.dat'))
+    level_sets |= set(dat[:-4] for dat in os.listdir(DATA_DIR) if dat.endswith('.dat'))
+    level_sets |= set(dat[:-4] for dat in os.listdir('.') if dat.endswith('.dat'))
 
-    try:
-        levelset = level_sets.index(args.levelset)
-    except ValueError:
-        if args.levelset is not None and args.levelset.endswith('.dat'):
-            levelset = len(level_sets)
-            level_sets.append(args.levelset)
-        else:
-            levelset = config.get('levelset', 'default')
+    if args.levelset in level_sets:
+        levelset = args.levelset
+    elif args.levelset is not None and args.levelset.endswith('.dat'):
+            levelset = args.levelset[:-4]
+            level_sets.add(levelset)
+    else:
+        levelset = config.get('levelset', levelset)
+    level_sets = list(level_sets)
+    level_sets.sort()
     level = config.get('levels', {}).get(levelset, 0)
     game.clever_bears = config.get('cleverbears', False)
+    levels = config.get('levels', {})
 
     load_levels(levelset)
     while level < len(game.levels):

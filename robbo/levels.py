@@ -10,9 +10,11 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import os
 import re
 from pkg_resources import resource_string
 
+from .defs import DATA_DIR
 
 file_section_re = re.compile(r'\[(\w+)\]\s*')
 
@@ -35,11 +37,15 @@ def trans(i):
 
 def load_levels(name='original'):
     from . import game
+
     game.levels = []
     try:
-        source = open(name).read()
+        source = open(name+'.dat').read()
     except FileNotFoundError:
-        source = resource_string('robbo', 'levels/'+name+'.dat').decode('utf8')
+        try:
+            source = open(os.path.join(DATA_DIR, name + '.dat')).read()
+        except FileNotFoundError:
+            source = resource_string('robbo', 'levels/'+name+'.dat').decode('utf8')
     level = {}
     section = None
     data = ''

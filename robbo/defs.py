@@ -10,6 +10,8 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import os
+import appdirs
 
 # Directions
 NORTH = 3
@@ -28,3 +30,7 @@ STOP = -1
 SCROLL_UP = SIZE // 4
 SCROLL_DOWN = -SCROLL_UP
 
+
+# Directories
+CONFIG_FILE = os.path.join(appdirs.user_config_dir(), 'pyrobbo.yml')
+DATA_DIR = appdirs.user_data_dir('pyrobbo')

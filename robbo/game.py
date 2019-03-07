@@ -10,8 +10,6 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-import sys
-
 import pygame
 from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_b, K_f, K_q, K_x, K_l, \
     K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL
@@ -159,7 +157,13 @@ def play_level(level):
                         robbo.move_key(move)
                 # system keys
                 elif event.key == K_f:
-                     pygame.display.toggle_fullscreen()
+                    if not pygame.display.toggle_fullscreen():
+                        import robbo as main
+                        flags = 0 if screen.get_flags() & pygame.FULLSCREEN else pygame.FULLSCREEN
+                        main.screen = pygame.display.set_mode((640, 480), flags)
+                        status.refresh()
+                        status.update()
+                        screen.set_clip(screen_rect)
                 elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META):
                     draw_sprites()
                     if mods & KMOD_SHIFT:

@@ -42,11 +42,14 @@ class Status(object):
             'bullets': game.images.get_icon(images.S_BULLETS),
             'level': game.images.get_icon(images.S_LEVEL)
         }
-        screen.blit(self.images['parts'], pygame.Rect(self.X_PARTS-32, self.Y, 32, 32))
-        screen.blit(self.images['keys'], pygame.Rect(self.X_KEYS-32, self.Y, 32, 32))
-        screen.blit(self.images['bullets'], pygame.Rect(self.X_BULLETS-32, self.Y, 32, 32))
-        screen.blit(self.images['level'], pygame.Rect(self.X_LEVEL-36, self.Y, 32, 32))
+        self.refresh()
         self.clear()
+
+    def refresh(self):
+        screen.blit(self.images['parts'], pygame.Rect(self.X_PARTS - 32, self.Y, 32, 32))
+        screen.blit(self.images['keys'], pygame.Rect(self.X_KEYS - 32, self.Y, 32, 32))
+        screen.blit(self.images['bullets'], pygame.Rect(self.X_BULLETS - 32, self.Y, 32, 32))
+        screen.blit(self.images['level'], pygame.Rect(self.X_LEVEL - 36, self.Y, 32, 32))
 
     def clear(self):
         self.keys = 0
