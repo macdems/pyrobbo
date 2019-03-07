@@ -33,4 +33,4 @@ SCROLL_DOWN = -SCROLL_UP
 
 # Directories
 CONFIG_FILE = os.path.join(appdirs.user_config_dir(), 'pyrobbo.yml')
-DATA_DIR = appdirs.user_data_dir('pyrobbo')
+DATA_DIRS = [appdirs.user_data_dir('pyrobbo')] + appdirs.site_data_dir('pyrobbo', multipath=True).split(os.pathsep)

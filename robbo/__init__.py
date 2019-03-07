@@ -118,7 +118,11 @@ def main():
     screen_rect = pygame.Rect((64, 32), (512, 384))
 
     level_sets = set(dat[:-4] for dat in resource_listdir('robbo', 'levels') if dat.endswith('.dat'))
-    level_sets |= set(dat[:-4] for dat in os.listdir(DATA_DIR) if dat.endswith('.dat'))
+    for data_dir in DATA_DIRS:
+        try:
+            level_sets |= set(dat[:-4] for dat in os.listdir(os.path.join(data_dir, 'levels')) if dat.endswith('.dat'))
+        except FileNotFoundError:
+            continue
     level_sets |= set(dat[:-4] for dat in os.listdir('.') if dat.endswith('.dat'))
 
     if args.levelset in level_sets:
@@ -136,7 +140,7 @@ def main():
     from . import game
     game.clever_bears = config.get('cleverbears', False)
 
-    load_levels(levelset)
+    game.levels = load_levels(levelset)
     while level < len(game.levels):
         try:
             levels[levelset] = level
@@ -147,9 +151,16 @@ def main():
         except game.ChangeLevelSet:
             selected = select_levelset()
             if selected != levelset:
-                levelset = selected
-                load_levels(levelset)
-                level = levels.get(levelset, 0)
+                try:
+                    newlevels = load_levels(selected)
+                except:
+                    import traceback
+                    traceback.print_exc()
+                    level_sets.remove(selected)
+                else:
+                    levelset = selected
+                    level = levels.get(levelset, 0)
+                    game.levels = newlevels
         else:
             level += 1
 

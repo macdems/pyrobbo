@@ -14,7 +14,7 @@ import os
 import re
 from pkg_resources import resource_string
 
-from .defs import DATA_DIR
+from .defs import DATA_DIRS
 
 file_section_re = re.compile(r'\[(\w+)\]\s*')
 
@@ -36,16 +36,16 @@ def trans(i):
 
 
 def load_levels(name='original'):
-    from . import game
-
-    game.levels = []
-    try:
-        source = open(name+'.dat').read()
-    except FileNotFoundError:
+    levels = []
+    for data_dir in [''] + [os.path.join(d, 'levels') for d in DATA_DIRS]:
         try:
-            source = open(os.path.join(DATA_DIR, name + '.dat')).read()
+            source = open(os.path.join(data_dir, name + '.dat')).read()
         except FileNotFoundError:
-            source = resource_string('robbo', 'levels/'+name+'.dat').decode('utf8')
+            continue
+        else:
+            break
+    else:
+        source = resource_string('robbo', 'levels/'+name+'.dat').decode('utf8')
     level = {}
     section = None
     data = ''
@@ -85,7 +85,7 @@ def load_levels(name='original'):
                                     additional.setdefault(c, {})[p] = data
                         level['data'] = '\n'.join(rows)
                     level['additional'] = additional
-                    game.levels.append(level)
+                    levels.append(level)
                     level = {}
                     section = None
                 else:
@@ -94,3 +94,4 @@ def load_levels(name='original'):
                 data += line + '\n'
         except Exception as err:
             raise type(err)("line {}: {}".format(lineno, str(err)))
+    return levels
