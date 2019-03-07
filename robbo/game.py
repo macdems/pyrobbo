@@ -13,7 +13,7 @@
 import sys
 
 import pygame
-from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_RETURN, K_b, K_f, K_q, K_x, K_l, \
+from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_b, K_f, K_q, K_x, K_l, \
     K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL
 
 from .defs import *
@@ -35,10 +35,6 @@ from .sprites import explode
 
 
 clever_bears = False
-
-level_sets = ['original']
-levelset = 0
-
 
 MOVES = {
     K_UP: NORTH,
@@ -64,39 +60,9 @@ class SelectLevel(Exception):
         self.level = level
 
 
-class LoadLevelSet(Exception):
+class ChangeLevelSet(Exception):
     """Load levels exception"""
-    def __init__(self, index=None):
-        self.index = index
-
-
-def select_levelset():
-    screen.set_clip(screen.get_rect())
-    X, Y, W, H = 64, 432, 512, 32
-    rect = pygame.Rect(X, Y, W, H)
-
-    font = pygame.font.Font(None, 48)
-
-    level = levelset
-
-    while True:
-        text = font.render(level_sets[level].upper(), 0, (255, 255, 255))
-        screen.fill((0, 0, 0), rect)
-        w = text.get_width()
-        screen.blit(text, (X + (W-w)//2, Y))
-        pygame.display.flip()
-        event = pygame.event.wait()
-        if event.type == pygame.QUIT:
-            quit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                level = (level - 1) % len(level_sets)
-            if event.key == pygame.K_DOWN:
-                level = (level + 1) % len(level_sets)
-            if event.key == K_RETURN:
-                screen.fill((0, 0, 0), rect)
-                return level
-        pygame.event.pump()
+    pass
 
 
 def update_sprites():
@@ -197,7 +163,7 @@ def play_level(level):
                 elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META):
                     draw_sprites()
                     if mods & KMOD_SHIFT:
-                        raise LoadLevelSet(select_levelset())
+                        raise ChangeLevelSet()
                     else:
                         raise SelectLevel(status.select_level())
                 elif event.key == K_b and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META | KMOD_SHIFT):

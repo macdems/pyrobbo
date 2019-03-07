@@ -32,6 +32,8 @@ setup(
     python_requires='>=3',
     install_requires=[
         'pygame',
+        'PyYAML',
+        'appdirs',
         'setuptools'
     ],
     package_data={
