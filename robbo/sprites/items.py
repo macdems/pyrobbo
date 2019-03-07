@@ -87,7 +87,7 @@ class Bomb(Sprite):
 class Capsule(BlinkingSprite):
     IMAGES = images.CAPSULE1, images.CAPSULE2
     UPDATE_TIME = 0
-    GROUPS = 'push', 'update'
+    GROUPS = 'push', 'update', 'durable'
 
     def __init__(self, pos):
         super(Capsule, self).__init__(pos)
