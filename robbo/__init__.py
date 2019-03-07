@@ -32,7 +32,7 @@ parser = argparse.ArgumentParser()
 parser_screen = parser.add_mutually_exclusive_group()
 parser_screen.add_argument('-f', '--fullscreen', help="start in fullscreen", action='store_true')
 parser_screen.add_argument('-w', '--window', help="start in window", action='store_true')
-parser.add_argument('-s', '--skin', help="selected skin set", type=str, default="default")
+parser.add_argument('-s', '--skin', help="selected skin set", type=str)
 parser.add_argument("levelset", help="name of the level set to load", nargs='?')
 
 
@@ -48,7 +48,8 @@ def quit():
         'levelset': levelset,
         'levels': levels,
         'cleverbears': game.clever_bears,
-        'fullscreen': bool(screen.get_flags() & pygame.FULLSCREEN)
+        'fullscreen': bool(screen.get_flags() & pygame.FULLSCREEN),
+        'skin': skin,
     }
     yaml.dump(config, open(CONFIG_FILE, 'w'), default_flow_style=False)
     pygame.quit()
@@ -107,13 +108,14 @@ def main():
     pygame.key.set_repeat(0,0)
 
     global skin, level_sets, levelset, levels, clock, clock_speed, screen, screen_rect
-    skin = args.skin
+    if args.skin is not None:
+        skin = args.skin
+    else:
+        skin = config.get('skin', skin)
     clock = pygame.time.Clock()
     clock_speed = 8
     screen = pygame.display.set_mode((640, 480), flags)
     screen_rect = pygame.Rect((64, 32), (512, 384))
-
-    from . import game
 
     level_sets = set(dat[:-4] for dat in resource_listdir('robbo', 'levels') if dat.endswith('.dat'))
     level_sets |= set(dat[:-4] for dat in os.listdir(DATA_DIR) if dat.endswith('.dat'))
@@ -129,8 +131,10 @@ def main():
     level_sets = list(level_sets)
     level_sets.sort()
     level = config.get('levels', {}).get(levelset, 0)
-    game.clever_bears = config.get('cleverbears', False)
     levels = config.get('levels', {})
+
+    from . import game
+    game.clever_bears = config.get('cleverbears', False)
 
     load_levels(levelset)
     while level < len(game.levels):
