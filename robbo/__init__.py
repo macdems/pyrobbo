@@ -184,4 +184,5 @@ def main():
                 else:
                     level += 1
             levelset = level_sets[(level_sets.index(levelset) + 1) % len(level_sets)]
+            level = 0
 
