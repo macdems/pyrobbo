@@ -12,6 +12,7 @@
 # GNU General Public License for more details.
 import sys
 import os
+import shutil
 import argparse
 import yaml
 from pkg_resources import resource_listdir
@@ -33,7 +34,7 @@ parser_screen = parser.add_mutually_exclusive_group()
 parser_screen.add_argument('-f', '--fullscreen', help="start in fullscreen", action='store_true')
 parser_screen.add_argument('-w', '--window', help="start in window", action='store_true')
 parser.add_argument('-s', '--skin', help="selected skin set", type=str)
-parser.add_argument("levelset", help="name of the level set to load", nargs='?')
+parser.add_argument("levelset", help="name of the level set to install", nargs='*')
 
 
 level_sets = ['original']
@@ -61,7 +62,7 @@ def select_levelset():
     X, Y, W, H = 64, 432, 512, 32
     rect = pygame.Rect(X, Y, W, H)
 
-    font = pygame.font.Font(None, 48)
+    font = pygame.font.Font(None, 46)
 
     try:
         level = level_sets.index(levelset)
@@ -69,7 +70,7 @@ def select_levelset():
         level = level_sets.index('original')
 
     while True:
-        text = font.render(os.path.basename(level_sets[level]).upper(), 0, (255, 255, 255))
+        text = font.render(level_sets[level].upper(), 0, (255, 255, 255))
         screen.fill((0, 0, 0), rect)
         w = text.get_width()
         screen.blit(text, (X + (W-w)//2, Y))
@@ -117,6 +118,23 @@ def main():
     screen = pygame.display.set_mode((640, 480), flags)
     screen_rect = pygame.Rect((64, 32), (512, 384))
 
+    if args.levelset:
+        install = [arg for arg in args.levelset if arg.endswith('.dat') and os.path.isfile(arg)]
+        if install:
+            try:
+                user_levels_dir = os.path.join(USER_DATA_DIR, 'levels')
+                os.makedirs(user_levels_dir, exist_ok=True)
+            except OSError:
+                pass
+            else:
+                for i in install:
+                    try:
+                        shutil.copy(i, user_levels_dir)
+                    except (OSError, IOError):
+                        pass
+                    else:
+                        config['levelset'] = os.path.basename(i)[:-4]
+
     levels = config.get('levels', {})
     level_sets = set(dat[:-4] for dat in resource_listdir('robbo', 'levels') if dat.endswith('.dat'))
     for data_dir in DATA_DIRS:
@@ -125,16 +143,7 @@ def main():
         except FileNotFoundError:
             continue
     level_sets |= set(dat[:-4] for dat in os.listdir('.') if dat.endswith('.dat'))
-    for level in levels:
-        if os.path.exists(level+'.dat'):
-            level_sets.add(level)
-    if args.levelset in level_sets:
-        levelset = args.levelset
-    elif args.levelset is not None and args.levelset.endswith('.dat'):
-            levelset = args.levelset[:-4]
-            level_sets.add(levelset)
-    else:
-        levelset = config.get('levelset', levelset)
+    levelset = config.get('levelset', levelset)
     level_sets = list(level_sets)
     level_sets.sort()
     level = config.get('levels', {}).get(levelset, 0)

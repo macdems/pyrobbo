@@ -37,9 +37,9 @@ def trans(i):
 
 def load_levels(name='original'):
     levels = []
-    for data_dir in [''] + [os.path.join(d, 'levels') for d in DATA_DIRS]:
+    for data_dir in DATA_DIRS:
         try:
-            source = open(os.path.join(data_dir, name + '.dat')).read()
+            source = open(os.path.join(data_dir, 'levels', name + '.dat')).read()
         except FileNotFoundError:
             continue
         else:
