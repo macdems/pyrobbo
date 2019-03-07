@@ -11,9 +11,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 from warnings import warn
+from weakref import ref
 
-from .. import game, screen, images, sounds
-from ..board import Board, rectcollide
+from .. import game, images, sounds
+from ..board import Board
 from ..defs import *
 from . import BlinkingSprite, Stars
 
@@ -32,7 +33,7 @@ class Teleport(BlinkingSprite):
         if group is not None:
             self.group = group
             self.no = no
-            game.board.teleports[self.group][no] = self
+            game.board.teleports[group][no] = ref(self)
         else:
             self.group = None
 
@@ -43,7 +44,7 @@ class Teleport(BlinkingSprite):
         direct = STEPS.index(step)
         moved = 0
         if self.group is not None:
-            target = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]
+            target = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]()
         else:
             target = None
         for dest in target, self:
