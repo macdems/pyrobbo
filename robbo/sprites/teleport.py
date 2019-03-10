@@ -75,6 +75,6 @@ class Teleport(BlinkingSprite):
         game.robbo.spawn()
 
         # Play sound
-        sounds.teleport.play()
+        sounds.play(sounds.teleport)
 
 

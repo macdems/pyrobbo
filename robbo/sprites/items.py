@@ -62,7 +62,7 @@ class Bomb(Sprite):
     _chain = []
 
     def hit(self):
-        sounds.bomb.play()
+        sounds.play(sounds.bomb)
         rects = [self.rect.move((x, y)) for x in (-SIZE, 0, SIZE) for y in (-SIZE, 0, SIZE) if x != 0 or y != 0]
         rect = self.rect.inflate(64, 64)
         explode(self)
@@ -96,7 +96,7 @@ class Capsule(BlinkingSprite):
 
     def activate(self, yuppie=True):
         if yuppie:
-            sounds.lastscrew.play()
+            sounds.play(sounds.lastscrew)
             original = screen.copy()
             screen.fill((255, 255, 255))
             pygame.display.flip()
@@ -123,7 +123,7 @@ class Screw(Sprite):
             game.status.parts -= 1
         game.status.update()
         # Gramy dźwięk
-        sounds.screw.play()
+        sounds.play(sounds.screw)
         if game.status.parts == 0:
             if game.capsule is not None:
                 game.capsule.activate()
@@ -137,7 +137,7 @@ class Bullet(Sprite):
     def collect(self):
         game.status.bullets += 9
         game.status.update()
-        sounds.bullet.play()
+        sounds.play(sounds.bullet)
 
 
 @Board.sprite('%')
@@ -148,7 +148,7 @@ class Key(Sprite):
     def collect(self):
         game.status.keys += 1
         game.status.update()
-        sounds.key.play()
+        sounds.play(sounds.key)
 
 
 @Board.sprite('D')
@@ -159,7 +159,7 @@ class Door(Sprite):
     def open(self):
         game.status.keys -= 1
         game.status.update()
-        sounds.door.play()
+        sounds.play(sounds.door)
 
 
 @Board.sprite('?')

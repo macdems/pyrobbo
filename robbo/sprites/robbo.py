@@ -50,7 +50,7 @@ class Robbo(pygame.sprite.Sprite):
         self.active = True
         self.pos = pos
         self.rect = pygame.Rect(SIZE*pos[0], SIZE*pos[1], SIZE, SIZE).move(screen_rect.topleft)
-        sounds.spawn.play()
+        sounds.play(sounds.spawn)
         self.spawn()
 
         game.robbo = self
@@ -92,7 +92,7 @@ class Robbo(pygame.sprite.Sprite):
                             if hasattr(sprite, 'push'):
                                 sprite.push(self.step)
                             game.board.move_sprite(sprite, self.step)
-                        sounds.push.play()
+                        sounds.play(sounds.push)
                     else:
                         move = False
 
@@ -144,7 +144,7 @@ class Robbo(pygame.sprite.Sprite):
 
     def fire(self, dir):
         if self.active and game.status.bullets > 0:
-            sounds.shoot.play()
+            sounds.play(sounds.shoot)
             fire_blast(self, dir)
             game.status.bullets -= 1
             game.status.update()
@@ -159,7 +159,7 @@ class Robbo(pygame.sprite.Sprite):
             game.robbo = DeadRobbo(self.rect)
             for g in groups:
                 g.add(game.robbo)
-            sounds.die.play()
+            sounds.play(sounds.die)
 
 
 class DeadRobbo(Stars):

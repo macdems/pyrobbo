@@ -13,6 +13,13 @@
 import pygame
 from pkg_resources import resource_stream
 
+mute = False
+
+
+def play(sound):
+    if not mute:
+        sound.play()
+
 
 blaster = pygame.mixer.Sound(resource_stream('robbo', 'sounds/blaster.wav'))
 bomb = pygame.mixer.Sound(resource_stream('robbo', 'sounds/bomb.wav'))

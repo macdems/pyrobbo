@@ -11,7 +11,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import pygame
-from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_b, K_f, K_q, K_x, K_l, \
+from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_b, K_f, K_q, K_x, K_l, K_m, \
     K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL
 
 from .defs import *
@@ -107,7 +107,7 @@ def play_level(level):
 
                 clock.tick(clock_speed)
             # Cleanup board
-            sounds.die.play()
+            sounds.play(sounds.die)
             for sprite in board.sprites:
                 explode(sprite)
             while board.sprites:
@@ -172,6 +172,8 @@ def play_level(level):
                         raise SelectLevel(status.select_level())
                 elif event.key == K_b and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META | KMOD_SHIFT):
                     clever_bears = not clever_bears
+                elif event.key == K_m and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META | KMOD_SHIFT):
+                    sounds.mute = not sounds.mute
                 elif event.key == K_PLUS or event.key == K_EQUALS:
                     clock_speed *= 1.2
                 elif event.key == K_MINUS:
@@ -216,7 +218,7 @@ def play_level(level):
         try:
             robbo.update()
         except EndLevel:
-            sounds.finish.play()
+            sounds.play(sounds.finish)
             w, h = screen.get_size()
             fade = pygame.Surface((w, h))
             fade.convert()

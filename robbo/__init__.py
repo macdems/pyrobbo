@@ -11,7 +11,6 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import sys
-import os
 import shutil
 import argparse
 import yaml
@@ -21,7 +20,6 @@ from pygame.constants import K_UP, K_DOWN, K_RETURN
 
 from .defs import *
 from .levels import load_levels
-
 
 clock = None
 clock_speed = None
@@ -44,13 +42,14 @@ levels = {}
 
 
 def quit():
-    from . import game
+    from . import game, sounds
     config = {
         'levelset': levelset,
         'levels': levels,
         'cleverbears': game.clever_bears,
         'fullscreen': bool(screen.get_flags() & pygame.FULLSCREEN),
         'skin': skin,
+        'mute': sounds.mute,
     }
     yaml.dump(config, open(CONFIG_FILE, 'w'), default_flow_style=False)
     pygame.quit()
@@ -148,8 +147,9 @@ def main():
     level_sets.sort()
     level = config.get('levels', {}).get(levelset, 0)
 
-    from . import game
+    from . import game, sounds
     game.clever_bears = config.get('cleverbears', False)
+    sounds.mute = config.get('mute', sounds.mute)
 
     while True:
         try:

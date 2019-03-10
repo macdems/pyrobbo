@@ -28,7 +28,7 @@ def hit(rect, old=None):
                 if hasattr(hit, 'hit'):
                     hit.hit()
                 else:
-                    sounds.blaster.play()
+                    sounds.play(sounds.blaster)
                     hit.kill()
                     game.board.add_sprite(Stars(hit.rect))
             elif old is not None:
