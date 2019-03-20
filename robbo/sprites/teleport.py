@@ -44,12 +44,13 @@ class Teleport(BlinkingSprite):
         direct = STEPS.index(step)
         moved = 0
         if self.group is not None:
-            target = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]()
+            dest = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]()
         else:
-            target = None
-        for dest in target, self:
+            dest = None
+        while True:
             if dest is None:
                 warn('Target does not exist. This is probably an error in the level file.')
+                dest = self
                 continue
             for k in range(4):
                 step = STEPS[direct]
@@ -58,7 +59,10 @@ class Teleport(BlinkingSprite):
                     moved = 1
                     break
                 direct ^= (((k + 1) % 2) + 2)
-            if moved: break
+            if moved or self.group is None or dest is self:
+                break
+            else:
+                dest = game.board.teleports[self.group][(dest.no+1) % len(game.board.teleports[self.group])]()
 
         # Create disappear stars
         if moved:
