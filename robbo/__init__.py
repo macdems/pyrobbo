@@ -41,7 +41,7 @@ levelset = 'original'
 levels = {}
 
 
-def quit():
+def save():
     from . import game, sounds
     config = {
         'levelset': levelset,
@@ -52,6 +52,10 @@ def quit():
         'mute': sounds.mute,
     }
     yaml.dump(config, open(CONFIG_FILE, 'w'), default_flow_style=False)
+
+
+def quit():
+    save()
     pygame.quit()
     sys.exit(0)
 
@@ -164,6 +168,7 @@ def main():
             while level < len(game.levels):
                 try:
                     levels[levelset] = level
+                    save()
                     game.play_level(level)
                 except game.SelectLevel as selected:
                     if selected.level < len(game.levels):

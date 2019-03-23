@@ -44,7 +44,9 @@ class Teleport(BlinkingSprite):
         direct = STEPS.index(step)
         moved = 0
         if self.group is not None:
-            dest = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]()
+            dest = game.board.teleports[self.group][(self.no+1) % len(game.board.teleports[self.group])]
+            if dest is not None:
+                dest = dest()   # resolve weakref
         else:
             dest = None
         while True:
