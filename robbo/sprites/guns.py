@@ -20,7 +20,7 @@ from ..defs import *
 from . import Sprite, Stars
 
 
-def hit(rect, old=None):
+def hit(rect, oldrect=None):
     hits = rectcollide(rect, game.board.sprites)
     if hits:
         for hit in hits:
@@ -31,8 +31,8 @@ def hit(rect, old=None):
                     sounds.play(sounds.blaster)
                     hit.kill()
                     game.board.add_sprite(Stars(hit.rect))
-            elif old is not None:
-                    game.board.add_sprite(Stars(old))
+            elif oldrect is not None:
+                    game.board.add_sprite(Stars(oldrect))
         return True
     else:
         return False
@@ -45,9 +45,10 @@ class ShortBlast(pygame.sprite.Sprite):
     GROUPS = 'blast',
     UPDATE_TIME = 1
 
-    def __init__(self, rect, dir, icon=None):
+    def __init__(self, rect, dir, icon=None, flash=True):
         super(ShortBlast, self).__init__()
         self.dir = dir
+        self.flash = flash
         if icon is None:
             if dir == EAST or dir == WEST:
                 self._images = game.images.get_icon(images.BLAST_H1), game.images.get_icon(images.BLAST_H2)
@@ -62,7 +63,7 @@ class ShortBlast(pygame.sprite.Sprite):
 
     def update(self):
         newrect = self.rect.move(STEPS[self.dir])
-        if not game.board.rect.contains(newrect) or hit(newrect, self.rect):
+        if not game.board.rect.contains(newrect) or hit(newrect, self.rect if self.flash else None):
             self.kill()
             return
         self.rect = newrect
@@ -71,10 +72,10 @@ class ShortBlast(pygame.sprite.Sprite):
             self.image = self._images[self._ci]
 
 
-def fire_blast(source, dir, icon=None):
+def fire_blast(source, dir, icon=None, flash=True):
     testrect = source.rect.move(STEPS[dir])
     if not hit(testrect):
-        blast = ShortBlast(source.rect, dir, icon)
+        blast = ShortBlast(source.rect, dir, icon, flash)
         game.board.add_sprite(blast)
 
 
@@ -196,10 +197,11 @@ class Gun(Sprite):
         if self.shot_type == 2:
             if self.blasting:
                 self.blasting -= 1
-                fire_blast(self, self.facing, self.BIG_BLAST_ICONS[self.blasting])
+                blast = ShortBlast(self.rect, self.facing, self.BIG_BLAST_ICONS[self.blasting], False)
+                game.board.add_sprite(blast)
             else:
                 if random.randrange(self.SHOOT_FREQUENCY) == 0:
-                    fire_blast(self, self.facing, self.BIG_BLAST_ICONS[-1])
+                    fire_blast(self, self.facing, self.BIG_BLAST_ICONS[-1], False)
                     self.blasting = len(self.BIG_BLAST_ICONS) - 1
         elif self.shot_type == 1:
             if not self.blasting and random.randrange(self.SHOOT_FREQUENCY) == 0:
