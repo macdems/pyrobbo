@@ -79,6 +79,12 @@ def fire_blast(source, dir, icon=None, flash=True):
         game.board.add_sprite(blast)
 
 
+@Board.sprite('Ll')
+def place_blast(pos, dir=0):
+    rect = pygame.Rect(SIZE*pos[0], SIZE*pos[1], SIZE, SIZE).move(screen_rect.topleft)
+    return ShortBlast(rect, dir)
+
+
 class LongBlast(pygame.sprite.Sprite):
     """
     Short blast shot by Robbo and guns
@@ -122,18 +128,25 @@ class LongBlast(pygame.sprite.Sprite):
                 game.board.add_sprite(next)
         elif self._end is not None:
             if self._end == 0:
-                self.kill()
+                super(LongBlast, self).kill()
                 self._prev.blasting = False
             self._end -= 1
 
     def chain(self):
         if isinstance(self._prev, LongBlast):
-            self.kill()
+            super(LongBlast, self).kill()
             game.board.chain.append(self._prev)
         elif isinstance(self._prev, Gun):
             self._images = tuple(game.images.get_icon(i) for i in self.END_IMAGES)
             self.ci = -1
             self._end = len(self.END_IMAGES)
+
+    def kill(self):
+        super(LongBlast, self).kill()
+        if isinstance(self._prev, LongBlast):
+            game.board.chain.append(self._prev)
+        elif isinstance(self._prev, Gun):
+            self._prev.blasting = False
 
 
 @Board.sprite('}')
