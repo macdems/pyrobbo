@@ -11,6 +11,8 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+from subprocess import Popen, PIPE
+
 from setuptools import setup
 
 
@@ -19,9 +21,22 @@ def readme():
         return f.read()
 
 
+def version():
+    """Find current version form git"""
+    try:
+        p = Popen(['git', 'describe', '--abbrev=0'],
+                  stdout=PIPE, stderr=PIPE, encoding='utf8')
+        p.stderr.close()
+        version = p.stdout.read().strip()
+    except:
+        version = '0.0'
+    print("version", version)
+    return version
+
+
 setup(
     name='PyRobbo',
-    version='0.1',
+    version=version(),
     packages=['robbo', 'robbo.sprites'],
     description='Clone of an old 8-bit Atari game Robbo',
     long_description=readme(),
