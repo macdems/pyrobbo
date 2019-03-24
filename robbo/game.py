@@ -12,7 +12,7 @@
 # GNU General Public License for more details.
 import pygame
 from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_b, K_f, K_q, K_x, K_l, K_m, \
-    K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL
+    K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL, K_w, K_s, K_a, K_d
 
 from .defs import *
 
@@ -38,12 +38,18 @@ MOVES = {
     K_UP: NORTH,
     K_DOWN: SOUTH,
     K_LEFT: WEST,
-    K_RIGHT: EAST
+    K_RIGHT: EAST,
+    K_w: NORTH,
+    K_s: SOUTH,
+    K_a: WEST,
+    K_d: EAST
 }
 
 SCROLLS = {
     K_UP: SCROLL_UP,
-    K_DOWN: SCROLL_DOWN
+    K_DOWN: SCROLL_DOWN,
+    K_w: SCROLL_UP,
+    K_s: SCROLL_DOWN
 }
 
 
