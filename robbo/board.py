@@ -45,6 +45,7 @@ class Board(object):
         self.sprites_durable = pygame.sprite.Group()        # durable sprite
         self.sprites_fragile = pygame.sprite.Group()        # destroyed on hit
         self.sprites_blast = pygame.sprite.Group()          # blast
+        self.sprites_capsule = pygame.sprite.Group()        # capsules
         self.teleports = []
         self.scroll_offset = [0, 0]
         self.background = pygame.Surface(screen.get_size())
@@ -94,8 +95,11 @@ class Board(object):
         if 'screws' in level:
             game.status.parts = level['screws']
 
-        if game.status.parts == 0 and game.capsule is not None:
-            game.capsule.activate()
+        if game.status.parts == 0:
+            show = True
+            for capsule in game.board.sprites_capsule:
+                capsule.activate(show)
+                show = False
 
     def move_sprite(self, sprite, step):
         """Przesuwa sprite o dany krok"""

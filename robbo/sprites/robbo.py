@@ -84,7 +84,7 @@ class Robbo(pygame.sprite.Sprite):
                 pushed = rectcollide(newrect, game.board.sprites_push)
                 if pushed:
                     # Capsule is pushable, so we may test it here
-                    if game.capsule in pushed and game.capsule.active:
+                    if any(p in game.board.sprites_capsule and p.active for p in pushed):
                         raise game.EndLevel()
                     if game.board.can_move(newrect.move(self.step)):
                         self.rect = newrect

@@ -87,12 +87,11 @@ class Bomb(Sprite):
 class Capsule(BlinkingSprite):
     IMAGES = images.CAPSULE1, images.CAPSULE2
     UPDATE_TIME = 0
-    GROUPS = 'push', 'update', 'durable'
+    GROUPS = 'push', 'update', 'durable', 'capsule'
 
     def __init__(self, pos):
         super(Capsule, self).__init__(pos)
         self.active = False
-        game.capsule = self
 
     def activate(self, yuppie=True):
         if yuppie:
@@ -124,9 +123,11 @@ class Screw(Sprite):
         game.status.update()
         # Gramy dźwięk
         sounds.play(sounds.screw)
-        if game.status.parts == 0:
-            if game.capsule is not None:
-                game.capsule.activate()
+        if game.status.parts == 0 and any(not capsule.active for capsule in game.board.sprites_capsule):
+            show = True
+            for capsule in game.board.sprites_capsule:
+                capsule.activate(show)
+                show = False
 
 
 @Board.sprite("'")
@@ -185,6 +186,7 @@ class Surprise(Sprite):
                         Gun,
                         Surprise,
                         Eyes,
+                        Capsule,
                         #Life,
                     ))
                     self.kill()
