@@ -49,18 +49,25 @@ class Mob(BlinkingSprite):
 @Board.sprite('^')
 class Bird(Mob):
     IMAGES = images.BIRD1, images.BIRD2
+    GROUPS = Mob.GROUPS + ('birds',)
 
     SHOOT_FREQUENCY = 6
 
     def __init__(self, pos, dir=0, shooting_dir=0, shooting=0):
+        if not hasattr(game.board, 'sprites_birds'):
+            game.board.sprites_birds = pygame.sprite.Group()
         super(Bird, self).__init__(pos, dir)
         self.shooting = shooting
         self.shooting_dir = shooting_dir
 
     def move(self):
-        if not self.try_step(STEPS[self.dir]):
+        step = STEPS[self.dir]
+        if not self.try_step(step):
+            newrect = self.rect.move(step)
             self.dir = (self.dir + 2) % 4
-            self.try_step(STEPS[self.dir])
+            birds = rectcollide(newrect, game.board.sprites_birds)
+            if not birds:
+                self.try_step(STEPS[self.dir])
         if self.shooting:
             if random.randrange(self.SHOOT_FREQUENCY) == 0:
                 fire_blast(self, self.shooting_dir)
