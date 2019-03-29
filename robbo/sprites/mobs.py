@@ -65,9 +65,6 @@ class Bird(Mob):
         if not self.try_step(step):
             newrect = self.rect.move(step)
             self.dir = (self.dir + 2) % 4
-            birds = rectcollide(newrect, game.board.sprites_birds)
-            if not birds:
-                self.try_step(STEPS[self.dir])
         if self.shooting:
             if random.randrange(self.SHOOT_FREQUENCY) == 0:
                 fire_blast(self, self.shooting_dir)
