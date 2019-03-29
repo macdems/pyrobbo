@@ -171,7 +171,7 @@ def main():
                     save()
                     game.play_level(level)
                 except game.SelectLevel as selected:
-                    if selected.level < len(game.levels):
+                    if 0 <= selected.level < len(game.levels):
                         level = selected.level
                 except game.ChangeLevelSet:
                     selected = select_levelset()

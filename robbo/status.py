@@ -70,7 +70,7 @@ class Status(object):
         self.printnum(self.parts, (self.X_PARTS, self.Y), 2)
         self.printnum(self.keys, (self.X_KEYS, self.Y), 2)
         self.printnum(self.bullets, (self.X_BULLETS, self.Y), 2)
-        self.printnum(self.level, (self.X_LEVEL, self.Y), 2)
+        self.printnum(self.level+1, (self.X_LEVEL, self.Y), 2)
         screen.set_clip(scrclip)
 
     def select_level(self):
@@ -101,6 +101,6 @@ class Status(object):
             if len(digits) == 2:
                 break
 
-        return sum(digits)
+        return sum(digits) - 1
 
 
