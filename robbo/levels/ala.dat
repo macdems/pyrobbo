@@ -42,14 +42,16 @@
 
 
 [level]
-0
+1
+[colour]
+996600
 [author]
 Ala Dems
 [data]
 OOOOOOOOOOOOOOOO
 O.R..O%T^......O    ^E
 OT...OOOOOOOOODO
-O.'.&O.......^.O    &A0  ^WS*
+O.'.&O.......^.O    &A0  ^WS
 O...&O%........O    &B0
 OOOOOOOOOO.OOO.O
 O!....D.&O.....O    &C1
@@ -79,4 +81,39 @@ OT.O.......#...O
 OOOOOOOOOOOOOOOO
 [end]
 
+[level]
+2
+[author]
+Ala Dems
+[data]
+OOOOOOOOOOOOOOOO
+OR&H@.......@.!O    &A0  @E  @E
+O'HH...........O
+OHTH.&..@.....@O    &C0  @W  @W
+OHHH...ooooooooO
+O......o&.....%O    &B0
+O.@....o...~##.O    @W
+OOODOOOoM......O    ME
+O*....Oo%......O    *S
+O.TTT.Oo%......O
+O.TTT.OoM......O    ME
+O.TTT'Oo.......O
+O.....DD......MO    MW
+OOOOOOOOOOOOOOOO
+O&TTTTTTTTTTTTTO    &C1
+O.TTTTTTTTTTTTTO
+OTTTTTTTTTTTTTTO
+OQQQQQQQQQ.....O
+OT&...^..Q.....O    &B1  ^S
+O..^.....Q.....O    ^E
+OQQQQ????Q.....O
+OH%HQ....Q.....O
+OHHHQ####Q.....O
+OHHHQbbbbQ.....O
+OHHTQDDDDQ....?O
+OHHHQ....Q.....O
+OHQQQ....Q....TO
+OT.&}..'.Q....}O    &A1  }NE0*  }N.1
+OOOOOOOOOOOOOOOO
+[end]
 

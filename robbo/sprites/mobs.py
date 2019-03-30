@@ -53,10 +53,12 @@ class Bird(Mob):
 
     SHOOT_FREQUENCY = 6
 
-    def __init__(self, pos, dir=0, shooting_dir=0, shooting=0):
+    def __init__(self, pos, dir=0, shooting_dir=None, shooting=None):
         if not hasattr(game.board, 'sprites_birds'):
             game.board.sprites_birds = pygame.sprite.Group()
         super(Bird, self).__init__(pos, dir)
+        if shooting is None and shooting_dir is not None:
+            shooting = True
         self.shooting = shooting
         self.shooting_dir = shooting_dir
 

@@ -161,7 +161,7 @@ class Gun(Sprite):
 
     BIG_BLAST_ICONS = images.STARS1, images.STARS2, images.STARS3, images.STARS2, images.STARS1
 
-    def __init__(self, pos, facing=None, moving=0, shot_type=0, moves=0, rotates=0, rotates_random=0):
+    def __init__(self, pos, facing=None, moving=None, shot_type=0, moves=None, rotates=False, rotates_random=False):
         if facing is None:
             facing = random.randrange(4)
             rotates = 1

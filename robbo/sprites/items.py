@@ -187,7 +187,7 @@ class Surprise(Sprite):
                         Surprise,
                         Eyes,
                         Capsule,
-                        #Life,
+                        # Life,
                     ))
                     self.kill()
                     if choice is not None:

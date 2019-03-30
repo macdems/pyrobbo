@@ -110,13 +110,13 @@ def play_level(level):
                 for _ in range(6):
                     update_sprites()
                     draw_sprites()
-
                     clock.tick(clock_speed)
                 # Cleanup board
                 sounds.play(sounds.die)
                 for sprite in board.sprites:
                     explode(sprite)
-                while board.sprites:
+                for _ in range(12):     # timeout
+                    if not board.sprites: break
                     update_sprites()
                     draw_sprites()
                     clock.tick(clock_speed)
