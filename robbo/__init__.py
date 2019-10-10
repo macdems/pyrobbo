@@ -96,7 +96,11 @@ def main():
     args = parser.parse_args()
 
     try:
-        config = yaml.load(open(CONFIG_FILE, 'r'))
+        config_file = open(CONFIG_FILE, 'r')
+        try:
+            config = yaml.load(config_file, Loader=yaml.SafeLoader)
+        except TypeError:
+            config = yaml.load(config_file)
     except FileNotFoundError:
         config = {}
 
