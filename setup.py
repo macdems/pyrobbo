@@ -11,6 +11,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+import os
 from subprocess import Popen, PIPE
 
 from setuptools import setup
@@ -22,15 +23,22 @@ def readme():
 
 
 def version():
-    """Find current version form git"""
-    try:
-        p = Popen(['git', 'describe', '--abbrev=0'],
-                  stdout=PIPE, stderr=PIPE, encoding='utf8')
-        p.stderr.close()
-        version = p.stdout.read().strip()
-    except:
-        version = '0.0'
-    print("version", version)
+    """Find current version form environment or git"""
+    version = os.environ.get('PYROBBO_VERSION')
+    if not version:
+        try:
+            p = Popen(['git', 'describe', '--tags'],
+                      stdout=PIPE, stderr=PIPE, encoding='utf8')
+            p.stderr.close()
+            version = p.stdout.read().strip()
+            if '-' in version:
+                ver, rev, git = version.split('-')
+                version = "{}+git{}.{}".format(ver, rev, git)
+            if version.startswith('v'):
+                version = version[1:]
+        except:
+            version = '0.0.0'
+    print("version:", version)
     return version
 
 
