@@ -112,12 +112,10 @@ class Screw(Sprite):
     GROUPS = 'collect',
 
     def __init__(self, pos):
-        """Inicjuje sprite i dodaje do listy w board"""
         super(Screw, self).__init__(pos)
         game.status.parts += 1
 
     def collect(self):
-        """Funkcja wywoływana przy zebraniu klucza"""
         if game.status.parts > 0:
             game.status.parts -= 1
         game.status.update()

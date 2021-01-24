@@ -89,7 +89,7 @@ class Images(object):
         return pygame.Rect(34*(n%10)+2, 34*(n//10)+2, 32, 32)
 
     def get_icon(self, n):
-        """Funkcja zwraca obrazek o danym numerze"""
+        """Get icon with given number"""
         rect = pygame.Rect(0,0, 32,32)
         img = pygame.Surface((32,32)).convert_alpha()
         img.fill((0,0,0,0))
@@ -97,11 +97,10 @@ class Images(object):
         return img
 
     def _get_digit_rect(self, n):
-        """Funkcja zwraca rect danej cyfry"""
         return pygame.Rect(18*n,0,16,32)
 
     def get_digits(self):
-        """Funkcja zwraca tablicę zawierającą dane cyfry"""
+        """Get table with digit images"""
         digits = []
         rect = pygame.Rect(0,0, 16,32)
         for n in range(10):

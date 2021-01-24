@@ -102,7 +102,7 @@ class Board(object):
                 show = False
 
     def move_sprite(self, sprite, step):
-        """Przesuwa sprite o dany krok"""
+        """Move sprive by given step"""
         sprite.rect.move_ip(step)
         screen.blit(sprite.image, sprite.rect)
 

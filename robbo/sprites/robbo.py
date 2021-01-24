@@ -22,11 +22,10 @@ from .guns import fire_blast
 
 @Board.sprite('R')
 class Robbo(pygame.sprite.Sprite):
-    """Obiekt naszego robocika"""
+    """The Robbo itself"""
     GROUPS = 'fragile',
 
     def __init__(self, pos):
-        """Inicjuje wszystko co niezbędne dla naszego robocika"""
         super(Robbo, self).__init__()
         # Inicjujemy obrazki
         self.images = {
@@ -65,8 +64,6 @@ class Robbo(pygame.sprite.Sprite):
         self.image = self.spawn_images[-1]
 
     def update(self):
-        """Uaktualnienie bieżącego stanu robocika"""
-
         if self._spawning:
             self._spawning -= 1
             self.image = self.spawn_images[self._spawning]
