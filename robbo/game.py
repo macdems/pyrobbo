@@ -163,9 +163,9 @@ def play_level(level):
                             robbo.move_key(move)
                     # system keys
                     elif event.key == K_f:
-                        if not pygame.display.toggle_fullscreen():
+                        # if not pygame.display.toggle_fullscreen():
                             import robbo as main
-                            flags = 0 if screen.get_flags() & pygame.FULLSCREEN else pygame.FULLSCREEN
+                            flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
                             main.screen = pygame.display.set_mode((640, 480), flags)
                             status.refresh()
                             status.update()

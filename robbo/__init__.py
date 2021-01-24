@@ -21,6 +21,9 @@ from pygame.constants import K_UP, K_DOWN, K_RETURN
 from .defs import *
 from .levels import load_levels
 
+FLAGS_FULLSCREEN = pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF
+FLAGS_WINDOW = pygame.SCALED | pygame.RESIZABLE
+
 clock = None
 clock_speed = None
 screen = None
@@ -105,11 +108,11 @@ def main():
         config = {}
 
     if args.fullscreen:
-        flags = pygame.FULLSCREEN
+        flags = FLAGS_FULLSCREEN
     elif args.window:
-        flags = 0
+        flags = FLAGS_WINDOW
     else:
-        flags = pygame.FULLSCREEN if config.get('fullscreen', True) else 0
+        flags = FLAGS_FULLSCREEN if config.get('fullscreen', True) else FLAGS_WINDOW
 
     pygame.init()
     pygame.display.set_caption('PyRobbo')
@@ -194,4 +197,3 @@ def main():
                     level += 1
             levelset = level_sets[(level_sets.index(levelset) + 1) % len(level_sets)]
             level = 0
-
