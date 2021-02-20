@@ -5,6 +5,7 @@
 .idea/**/tasks.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/*.iml
 
 # File-based project format
 *.iws

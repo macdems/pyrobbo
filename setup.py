@@ -60,10 +60,10 @@ setup(
         'setuptools'
     ],
     package_data={
-        'robbo': ['sounds/*.wav', 'levels/*.dat', 'skins/*/*.png']
+        'robbo': ['sounds/*.wav', 'levels/*.dat', 'skins/*/*.png', 'robbo.svg', 'robbo.ico']
     },
     entry_points={
-        'console_scripts': ['pyrobbo=robbo:main']
+        'gui_scripts': ['pyrobbo=robbo:main']
 
     }
 )

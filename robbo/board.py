@@ -78,6 +78,7 @@ class Board(object):
         self.teleports = dict((g, [None] * tgs[g]) for g in tgs)
 
         mx = 0
+        y = 0
         for y, row in enumerate(level['data'].splitlines()):
             for x, c in enumerate(row):
                 mx = max(mx, x)
