@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "wheel", "setuptools-scm[toml]"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,7 +23,7 @@ dependencies = ["pygame>=2.0.0", "PyYAML>=5.3.1", "appdirs>=1.4.4"]
 dynamic = ["version"]
 
 [project.urls]
-homepage = "http://github.com/macdems/pyrobbo"
+Homepage = "http://github.com/macdems/pyrobbo"
 
 [project.gui-scripts]
 pyrobbo = "robbo:main"
@@ -37,5 +37,6 @@ robbo = [
     "robbo.ico",
 ]
 
-[tool.setuptools.dynamic]
-version = { attr = "robbo._version.__version__" }
+[tool.setuptools_scm]
+write_to = "robbo/__version__.py"
+git_describe_command = "git describe --dirty --tags --long --match v* --first-parent"

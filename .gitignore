@@ -31,3 +31,6 @@ sdist/
 ### Other
 *.a2s
 *.xex
+
+## Dynamic version
+/robbo/__version__.py
