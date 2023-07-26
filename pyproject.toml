@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PyRobbo"
+authors = [{ name = "Maciej Dems", email = "macdems@gmail.com" }]
+description = "Clone of an old 8-bit Atari game Robbo"
+readme = "README.md"
+requires-python = ">=3"
+license = { text = "GPL3" }
+keywords = ["game", "pygame", "robbo", "atari", "clone"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Games/Entertainment :: Arcade",
+    "Topic :: Games/Entertainment :: Puzzle Games",
+]
+dependencies = ["pygame>=2.0.0", "PyYAML>=5.3.1", "appdirs>=1.4.4"]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "http://github.com/macdems/pyrobbo"
+
+[project.gui-scripts]
+pyrobbo = "robbo:main"
+
+[tool.setuptools.package-data]
+robbo = [
+    "sounds/*.wav",
+    "levels/*.dat",
+    "skins/*/*.png",
+    "robbo.svg",
+    "robbo.ico",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "robbo._version.__version__" }

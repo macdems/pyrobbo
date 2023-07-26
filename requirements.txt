@@ -1,4 +1,4 @@
-pygame
-PyYAML
-appdirs
+pygame>=2.0.0
+PyYAML>=5.3.1
+appdirs>=1.4.4
 setuptools
