@@ -115,6 +115,7 @@ def main():
         flags = FLAGS_FULLSCREEN if config.get('fullscreen', True) else FLAGS_WINDOW
 
     pygame.init()
+    pygame.mouse.set_visible(False)
     pygame.display.set_caption('PyRobbo')
     pygame.key.set_repeat(0,0)
 

@@ -51,6 +51,18 @@ SCROLLS = {
     K_s: SCROLL_DOWN
 }
 
+JOYSTICK_MOVES = {
+    (0, -1): WEST,
+    (0, 1): EAST,
+    (1, -1): NORTH,
+    (1, 1): SOUTH,
+}
+
+JOYSTICK_SCROLLS = {
+    -1: SCROLL_UP,
+    1: SCROLL_DOWN
+}
+
 
 class EndLevel(Exception):
     """End level exception"""
@@ -81,7 +93,12 @@ def draw_sprites():
 
 def play_level(level):
     """The game loop"""
-    pygame.mouse.set_visible(0)
+    pygame.mouse.set_visible(False)
+
+    if pygame.joystick.get_count() > 0:
+        joystick = pygame.joystick.Joystick(0)
+    joystick_axes = [0, 0]
+    joystick_axis = None
 
     global clock_speed, clever_bears
 
@@ -142,6 +159,7 @@ def play_level(level):
                 item.chain()
 
             move = None
+            joystick_can_fire = True
 
             # Process user events
             for event in pygame.event.get():
@@ -199,6 +217,37 @@ def play_level(level):
                             scrolling = False
                         else:
                             scrolling = 0
+                elif event.type == pygame.JOYAXISMOTION and event.axis < 2:
+                    prev = joystick_axes[event.axis]
+                    if prev == -1:
+                        curr = -1 if event.value <= -0.45 else 1 if event.value >= 0.50 else 0
+                    elif prev == 1:
+                        curr = 1 if event.value >= 0.45 else -1 if event.value <= -0.50 else 0
+                    else:
+                        curr = -1 if event.value <= -0.55 else 1 if event.value >= 0.55 else 0
+                    if curr != prev:
+                        joystick_axes[event.axis] = curr
+                        if joystick.get_numbuttons() > 1 and joystick.get_button(1):
+                            if event.axis == 1:
+                                if curr != 0:
+                                    scrolling = True
+                                    scroll_step = JOYSTICK_SCROLLS[curr]
+                                else:
+                                    scrolling = False
+                        else:
+                            if curr != 0:
+                                move = JOYSTICK_MOVES[(event.axis, curr)]
+                                if joystick.get_button(0):
+                                    if joystick_can_fire: robbo.fire(move)
+                                    joystick_can_fire = False
+                                else:
+                                    robbo.move_key(move)
+                                    joystick_axis = event.axis
+                            elif joystick_axis == event.axis:
+                                robbo.move_key(STOP)
+                                joystick_axis = event.axis
+                elif event.type == pygame.JOYBUTTONUP and event.button == 1:
+                    scrolling = 0
             pygame.event.pump()
 
             # Check if scrolling is needed
