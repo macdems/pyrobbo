@@ -12,7 +12,7 @@
 # GNU General Public License for more details.
 import pygame
 
-from pkg_resources import resource_stream
+from pkg_resources import resource_exists, resource_listdir, resource_stream
 
 
 MAGNET_R = 0
@@ -69,6 +69,13 @@ ROBBO_W1 = 54
 ROBBO_W2 = 55
 ROBBO_N1 = 56
 ROBBO_N2 = 57
+
+
+def available_skins():
+    """List packaged skins that provide both the game sprites and the HUD digits."""
+    return sorted(name for name in resource_listdir('robbo', 'skins')
+                  if all(resource_exists('robbo', 'skins/{}/{}'.format(name, sheet))
+                         for sheet in ('icons.png', 'digits.png')))
 
 
 class Images(object):

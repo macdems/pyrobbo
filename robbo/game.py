@@ -22,7 +22,8 @@ status = None
 board = None
 robbo = None
 
-from . import screen, screen_rect, clock, clock_speed, skin, sounds, quit
+import robbo as main
+from . import screen, screen_rect, clock, clock_speed, sounds, quit
 from .board import Board
 from .images import Images
 from .status import Status
@@ -87,7 +88,7 @@ def play_level(level):
 
     # Init global game objects
     global images, status, board
-    images = Images(skin)
+    images = Images(main.skin)
 
     status = Status(level)
     board = Board()
@@ -169,7 +170,6 @@ def play_level(level):
                     # system keys
                     elif event.key == K_f:
                         # if not pygame.display.toggle_fullscreen():
-                        import robbo as main
                         flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
                         main.screen = pygame.display.set_mode((640, 480), flags)
                         status.refresh()

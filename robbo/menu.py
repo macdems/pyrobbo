@@ -1,6 +1,7 @@
-"""Front menu for choosing a level set and starting board."""
+"""Front menu for choosing a level set, starting board and visual theme."""
 import pygame
 
+import robbo as main
 from . import images, quit
 
 BACKGROUND = (18, 23, 31)
@@ -10,8 +11,8 @@ TEXT = (241, 238, 223)
 MUTED = (169, 183, 190)
 GOLD = (255, 199, 87)
 
-ROWS = (pygame.Rect(36, 155, 300, 48), pygame.Rect(36, 247, 300, 48))
-START = pygame.Rect(36, 340, 300, 52)
+ROWS = tuple(pygame.Rect(36, y, 300, 40) for y in (144, 217, 290))
+START = pygame.Rect(36, 348, 300, 44)
 PREVIEW = pygame.Rect(366, 118, 238, 274)
 
 
@@ -49,7 +50,7 @@ def draw_preview(screen, board, tiles):
 
 
 class LevelMenu:
-    def __init__(self, screen, skin, packs, name, saved):
+    def __init__(self, screen, skins, packs, name, saved):
         self.screen = screen
         self.page = pygame.Surface((640, 480)).convert()
         self.viewport = self.page.get_rect().fit(screen.get_rect())
@@ -63,18 +64,28 @@ class LevelMenu:
                 index = 0
             self.positions[name] = max(0, min(index, len(boards) - 1))
         self.row = 0
+        self.skins = skins
         self.small = pygame.font.Font(None, 22)
         self.large = pygame.font.Font(None, 36)
+        self.title = pygame.font.Font(None, 84).render('PyRobbo', True, TEXT)
+        self.set_skin(main.skin)
+
+    def set_skin(self, skin):
         skin_images = images.Images(skin)
         self.robot = pygame.transform.scale(skin_images.get_icon(images.ROBBO_S1), (64, 64))
         self.tiles = preview_tiles(skin_images)
-        self.title = pygame.font.Font(None, 84).render('PyRobbo', True, TEXT)
+        main.skin = skin
+
+    def move(self, step):
+        self.row = (self.row + step) % len(ROWS)
 
     def change(self, step):
         if self.row == 0:
             self.name = self.names[(self.names.index(self.name) + step) % len(self.names)]
-        else:
+        elif self.row == 1:
             self.positions[self.name] = (self.positions[self.name] + step) % len(self.packs[self.name])
+        else:
+            self.set_skin(self.skins[(self.skins.index(main.skin) + step) % len(self.skins)])
 
     def draw(self):
         screen = self.page
@@ -87,6 +98,7 @@ class LevelMenu:
         fields = (
             ('LEVEL SET', self.name, len(self.names)),
             ('LEVEL', '{} / {}'.format(level + 1, count), count),
+            ('THEME', main.skin, len(self.skins)),
         )
         for i, (label, value, choices) in enumerate(fields):
             rect = ROWS[i]
@@ -145,8 +157,8 @@ class LevelMenu:
         return False
 
 
-def select_level(screen, skin, packs, name, saved):
-    menu = LevelMenu(screen, skin, packs, name, saved)
+def select_level(screen, skins, packs, name, saved):
+    menu = LevelMenu(screen, skins, packs, name, saved)
     screen.set_clip(None)
     pygame.mouse.set_visible(True)
     # Keep the device open so SDL delivers axis, hat and button events.
@@ -164,18 +176,19 @@ def select_level(screen, skin, packs, name, saved):
                 quit()
             if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                 break
-            if event.key in (pygame.K_UP, pygame.K_w, pygame.K_DOWN, pygame.K_s, pygame.K_TAB):
-                menu.row = 1 - menu.row
+            if event.key in (pygame.K_UP, pygame.K_w):
+                menu.move(-1)
+            elif event.key in (pygame.K_DOWN, pygame.K_s, pygame.K_TAB):
+                menu.move(1)
             elif event.key in (pygame.K_LEFT, pygame.K_a):
                 menu.change(-1)
             elif event.key in (pygame.K_RIGHT, pygame.K_d):
                 menu.change(1)
             elif event.key == pygame.K_f:
-                # if not pygame.display.toggle_fullscreen():
-                    import robbo as main
-                    flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
-                    main.screen = screen = pygame.display.set_mode((640, 480), flags)
-                    menu.draw()
+                flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
+                main.screen = screen = pygame.display.set_mode((640, 480), flags)
+                menu.screen = screen
+                menu.viewport = menu.page.get_rect().fit(screen.get_rect())
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if menu.click(event.pos):
                 break
@@ -184,7 +197,7 @@ def select_level(screen, skin, packs, name, saved):
         elif event.type == pygame.JOYHATMOTION:
             dx, dy = event.value
             if dy:
-                menu.row = 1 - menu.row
+                menu.move(-dy)
             elif dx:
                 menu.change(dx)
             else:
@@ -201,7 +214,7 @@ def select_level(screen, skin, packs, name, saved):
             if axis == 0:
                 menu.change(direction)
             else:
-                menu.row = 1 - menu.row
+                menu.move(direction)
         elif event.type != pygame.WINDOWEXPOSED:
             continue
         menu.draw()

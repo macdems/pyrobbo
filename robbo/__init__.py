@@ -17,6 +17,7 @@ import yaml
 import pygame
 
 from .defs import *
+from .images import available_skins
 from .levels import load_level_sets
 
 FLAGS_FULLSCREEN = pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF
@@ -71,6 +72,16 @@ def main():
     except FileNotFoundError:
         config = {}
 
+    global skin, levelset, levels, clock, clock_speed, screen, screen_rect
+    skins = available_skins()
+    if not skins:
+        parser.exit(1, "No themes found.\n")
+    if args.skin is not None and args.skin not in skins:
+        parser.error("unknown skin '{}', choose from {}".format(args.skin, ', '.join(skins)))
+    skin = args.skin if args.skin is not None else config.get('skin', 'default')
+    if skin not in skins:
+        skin = 'default' if 'default' in skins else skins[0]
+
     if args.fullscreen:
         flags = FLAGS_FULLSCREEN
     elif args.window:
@@ -83,11 +94,6 @@ def main():
     pygame.display.set_caption('PyRobbo')
     pygame.key.set_repeat(0,0)
 
-    global skin, levelset, levels, clock, clock_speed, screen, screen_rect
-    if args.skin is not None:
-        skin = args.skin
-    else:
-        skin = config.get('skin', skin)
     clock = pygame.time.Clock()
     clock_speed = 8
     screen = pygame.display.set_mode((640, 480), flags)
@@ -126,7 +132,7 @@ def main():
     sounds.mute = config.get('mute', sounds.mute)
 
     while True:
-        levelset, level = select_level(screen, skin, packs, levelset, levels)
+        levelset, level = select_level(screen, skins, packs, levelset, levels)
         while True:
             game.levels = packs[levelset]
             levels[levelset] = level
