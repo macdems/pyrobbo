@@ -11,8 +11,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import pygame
-from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_b, K_f, K_q, K_x, K_l, K_m, \
-    K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL, K_w, K_s, K_a, K_d
+from pygame.constants import QUIT, KEYDOWN, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_b, K_f, K_q, K_x, K_l, K_m, K_r, \
+    K_PLUS, K_EQUALS, K_MINUS, KMOD_SHIFT, KMOD_CTRL, KMOD_ALT, KMOD_META, K_LCTRL, K_RCTRL, K_w, K_s, K_a, K_d, K_ESCAPE
 
 from .defs import *
 
@@ -30,26 +30,11 @@ from .status import Status
 # Register all sprites — do not remove the line below
 from .sprites import explode
 
-
 clever_bears = False
 
-MOVES = {
-    K_UP: NORTH,
-    K_DOWN: SOUTH,
-    K_LEFT: WEST,
-    K_RIGHT: EAST,
-    K_w: NORTH,
-    K_s: SOUTH,
-    K_a: WEST,
-    K_d: EAST
-}
+MOVES = {K_UP: NORTH, K_DOWN: SOUTH, K_LEFT: WEST, K_RIGHT: EAST, K_w: NORTH, K_s: SOUTH, K_a: WEST, K_d: EAST}
 
-SCROLLS = {
-    K_UP: SCROLL_UP,
-    K_DOWN: SCROLL_DOWN,
-    K_w: SCROLL_UP,
-    K_s: SCROLL_DOWN
-}
+SCROLLS = {K_UP: SCROLL_UP, K_DOWN: SCROLL_DOWN, K_w: SCROLL_UP, K_s: SCROLL_DOWN}
 
 JOYSTICK_MOVES = {
     (0, -1): WEST,
@@ -58,10 +43,7 @@ JOYSTICK_MOVES = {
     (1, 1): SOUTH,
 }
 
-JOYSTICK_SCROLLS = {
-    -1: SCROLL_UP,
-    1: SCROLL_DOWN
-}
+JOYSTICK_SCROLLS = {-1: SCROLL_UP, 1: SCROLL_DOWN}
 
 
 class EndLevel(Exception):
@@ -71,6 +53,7 @@ class EndLevel(Exception):
 
 class SelectLevel(Exception):
     """Level selected exception"""
+
     def __init__(self, level):
         self.level = level
 
@@ -113,8 +96,10 @@ def play_level(level):
     board.init(levels[level])
     status.update()
 
-    scrolling = 0       # are we scrolling?
-    scroll_step = 0       # scrolling direction
+    exiting = False  # are we exiting the level?
+
+    scrolling = 0  # are we scrolling?
+    scroll_step = 0  # scrolling direction
 
     # Draw static sprites
     board.sprites.draw(screen)
@@ -132,7 +117,7 @@ def play_level(level):
                 sounds.play(sounds.die)
                 for sprite in board.sprites:
                     explode(sprite)
-                for _ in range(12):     # timeout
+                for _ in range(12):  # timeout
                     if not board.sprites: break
                     update_sprites()
                     draw_sprites()
@@ -151,6 +136,8 @@ def play_level(level):
                 board.scroll_offset = [0, offset]
                 board.rect.move_ip(0, offset)
                 board.sprites.draw(screen)
+                if exiting:
+                    raise ChangeLevelSet()
 
             # Test for chained bombs and trigger them
             chain = board.chain
@@ -182,20 +169,18 @@ def play_level(level):
                     # system keys
                     elif event.key == K_f:
                         # if not pygame.display.toggle_fullscreen():
-                            import robbo as main
-                            flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
-                            main.screen = pygame.display.set_mode((640, 480), flags)
-                            status.refresh()
-                            status.update()
-                            screen.set_clip(screen_rect)
+                        import robbo as main
+                        flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
+                        main.screen = pygame.display.set_mode((640, 480), flags)
+                        status.refresh()
+                        status.update()
+                        screen.set_clip(screen_rect)
                     elif event.key == pygame.K_ESCAPE:
-                        raise ChangeLevelSet()
-                    elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META):
+                        robbo.die()
+                        exiting = True
+                    elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META | KMOD_SHIFT):
                         draw_sprites()
-                        if mods & KMOD_SHIFT:
-                            raise ChangeLevelSet()
-                        else:
-                            raise SelectLevel(status.select_level())
+                        raise SelectLevel(status.select_level())
                     elif event.key == K_b and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META | KMOD_SHIFT):
                         clever_bears = not clever_bears
                     elif event.key == K_m and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META | KMOD_SHIFT):
@@ -204,7 +189,8 @@ def play_level(level):
                         clock_speed *= 1.2
                     elif event.key == K_MINUS:
                         clock_speed /= 1.2
-                    elif event.key == K_x and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
+                    elif (event.key == K_x or event.key == K_r) and mods & KMOD_CTRL \
+                         and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
                         robbo.die()
                     elif event.key == K_q and mods & KMOD_CTRL and not mods & (KMOD_SHIFT | KMOD_ALT | KMOD_META):
                         quit()
@@ -253,20 +239,20 @@ def play_level(level):
             pygame.event.pump()
 
             # Check if scrolling is needed
-            if scrolling and (
-                    (board.scroll_offset[1] >= 0 and scroll_step == SCROLL_UP) or
-                    (board.rect.bottom <= screen_rect.height + SIZE and scroll_step == SCROLL_DOWN)
-            ):
+            if scrolling and ((board.scroll_offset[1] >= 0 and scroll_step == SCROLL_UP) or
+                              (board.rect.bottom <= screen_rect.height + SIZE and scroll_step == SCROLL_DOWN)):
                 scrolling = False if scrolling is True else 0
             else:
-                if robbo.rect.top < screen_rect.top + 2*SIZE and board.scroll_offset[1] < 0:
+                if robbo.rect.top < screen_rect.top + 2 * SIZE and board.scroll_offset[1] < 0:
                     if not isinstance(scrolling, bool):
-                        scrolling = 3; scroll_step = SCROLL_UP
-                elif robbo.rect.bottom > screen_rect.bottom - 2*SIZE and board.rect.bottom > screen_rect.height+SIZE:
+                        scrolling = 3
+                        scroll_step = SCROLL_UP
+                elif robbo.rect.bottom > screen_rect.bottom - 2 * SIZE and board.rect.bottom > screen_rect.height + SIZE:
                     if not isinstance(scrolling, bool):
-                        scrolling = 3; scroll_step = SCROLL_DOWN
+                        scrolling = 3
+                        scroll_step = SCROLL_DOWN
                 elif scrolling and scrolling is not True:
-                        scrolling -= 1
+                    scrolling -= 1
 
             # print(scrolling)
 
@@ -279,10 +265,10 @@ def play_level(level):
                     for sprite in board.sprites.sprites():
                         screen.blit(board.background, sprite.rect, sprite.rect)
                         sprite.rect.move_ip(0, scroll_step)
-                    board.scroll_offset[1] += scroll_step    # decide current offset
+                    board.scroll_offset[1] += scroll_step  # decide current offset
                     board.rect.move_ip(0, scroll_step)
                     draw_sprites()
-                    clock.tick(clock_speed*4)
+                    clock.tick(clock_speed * 4)
             else:
                 # Draw moving sprites
                 draw_sprites()
@@ -293,7 +279,7 @@ def play_level(level):
         w, h = screen.get_size()
         fade = pygame.Surface((w, h))
         fade.convert()
-        fade.fill((0,0,0))
+        fade.fill((0, 0, 0))
         robbo.kill()
         draw_sprites()
         for i in range(w, -1, -1):

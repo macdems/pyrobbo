@@ -68,8 +68,7 @@ class LevelMenu:
         skin_images = images.Images(skin)
         self.robot = pygame.transform.scale(skin_images.get_icon(images.ROBBO_S1), (64, 64))
         self.tiles = preview_tiles(skin_images)
-        title = pygame.font.Font(None, 42).render('PyRobbo', False, TEXT)
-        self.title = pygame.transform.scale2x(title)
+        self.title = pygame.font.Font(None, 84).render('PyRobbo', True, TEXT)
 
     def change(self, step):
         if self.row == 0:
@@ -114,11 +113,11 @@ class LevelMenu:
         screen.blit(self.small.render('LEVEL PREVIEW', True, MUTED), (PREVIEW.x + 12, PREVIEW.y + 10))
         draw_preview(screen, self.packs[self.name][level], self.tiles)
         pygame.draw.rect(screen, GOLD, START)
-        text = self.large.render('Start level', True, BACKGROUND)
+        text = self.large.render('Start Level', True, BACKGROUND)
         screen.blit(text, text.get_rect(center=START.center))
         pygame.draw.line(screen, EDGE, (36, 420), (604, 420))
-        for x, key, action in ((36, 'Up/Down', 'select'), (184, 'Left/Right', 'change'),
-                               (361, 'Enter', 'start'), (495, 'Esc', 'quit')):
+        for x, key, action in ((36, 'UP/DOWN', 'Select'), (184, 'LEFT/RIGHT', 'Change'),
+                               (361, 'ENTER', 'Start'), (495, 'ESC', 'Quit')):
             key_text = self.small.render(key, True, TEXT)
             screen.blit(key_text, (x, 441))
             screen.blit(self.small.render(action, True, MUTED), (x + key_text.get_width() + 6, 441))
@@ -171,6 +170,12 @@ def select_level(screen, skin, packs, name, saved):
                 menu.change(-1)
             elif event.key in (pygame.K_RIGHT, pygame.K_d):
                 menu.change(1)
+            elif event.key == pygame.K_f:
+                # if not pygame.display.toggle_fullscreen():
+                    import robbo as main
+                    flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
+                    main.screen = screen = pygame.display.set_mode((640, 480), flags)
+                    menu.draw()
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if menu.click(event.pos):
                 break
