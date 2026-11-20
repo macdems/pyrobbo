@@ -14,12 +14,10 @@ import sys
 import shutil
 import argparse
 import yaml
-from pkg_resources import resource_listdir
 import pygame
-from pygame.constants import K_UP, K_DOWN, K_RETURN
 
 from .defs import *
-from .levels import load_levels
+from .levels import load_level_sets
 
 FLAGS_FULLSCREEN = pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF
 FLAGS_WINDOW = pygame.SCALED | pygame.RESIZABLE
@@ -38,7 +36,6 @@ parser.add_argument('-s', '--skin', help="selected skin set", type=str)
 parser.add_argument("levelset", help="name of the level set to install", nargs='*')
 
 
-level_sets = ['original']
 levelset = 'original'
 
 levels = {}
@@ -54,7 +51,9 @@ def save():
         'skin': skin,
         'mute': sounds.mute,
     }
-    yaml.dump(config, open(CONFIG_FILE, 'w'), default_flow_style=False)
+    os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+    with open(CONFIG_FILE, 'w') as config_file:
+        yaml.dump(config, config_file, default_flow_style=False)
 
 
 def quit():
@@ -63,47 +62,12 @@ def quit():
     sys.exit(0)
 
 
-def select_levelset():
-    screen.set_clip(screen.get_rect())
-    X, Y, W, H = 64, 432, 512, 32
-    rect = pygame.Rect(X, Y, W, H)
-
-    font = pygame.font.Font(None, 46)
-
-    try:
-        level = level_sets.index(levelset)
-    except ValueError:
-        level = level_sets.index('original')
-
-    while True:
-        text = font.render(level_sets[level].upper(), 0, (255, 255, 255))
-        screen.fill((0, 0, 0), rect)
-        w = text.get_width()
-        screen.blit(text, (X + (W-w)//2, Y))
-        pygame.display.flip()
-        event = pygame.event.wait()
-        if event.type == pygame.QUIT:
-            quit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == K_UP:
-                level = (level - 1) % len(level_sets)
-            if event.key == K_DOWN:
-                level = (level + 1) % len(level_sets)
-            if event.key == K_RETURN:
-                screen.fill((0, 0, 0), rect)
-                return level_sets[level]
-        pygame.event.pump()
-
-
 def main():
     args = parser.parse_args()
 
     try:
-        config_file = open(CONFIG_FILE, 'r')
-        try:
-            config = yaml.load(config_file, Loader=yaml.SafeLoader)
-        except TypeError:
-            config = yaml.load(config_file)
+        with open(CONFIG_FILE) as config_file:
+            config = yaml.safe_load(config_file) or {}
     except FileNotFoundError:
         config = {}
 
@@ -119,7 +83,7 @@ def main():
     pygame.display.set_caption('PyRobbo')
     pygame.key.set_repeat(0,0)
 
-    global skin, level_sets, levelset, levels, clock, clock_speed, screen, screen_rect
+    global skin, levelset, levels, clock, clock_speed, screen, screen_rect
     if args.skin is not None:
         skin = args.skin
     else:
@@ -147,54 +111,35 @@ def main():
                         config['levelset'] = os.path.basename(i)[:-4]
 
     levels = config.get('levels', {})
-    level_sets = set(dat[:-4] for dat in resource_listdir('robbo', 'levels') if dat.endswith('.dat'))
-    for data_dir in DATA_DIRS:
-        try:
-            level_sets |= set(dat[:-4] for dat in os.listdir(os.path.join(data_dir, 'levels')) if dat.endswith('.dat'))
-        except FileNotFoundError:
-            continue
-    level_sets |= set(dat[:-4] for dat in os.listdir('.') if dat.endswith('.dat'))
+    packs = load_level_sets()
+    if not packs:
+        pygame.quit()
+        parser.exit(1, "No playable level sets found.\n")
+    names = list(packs)
     levelset = config.get('levelset', levelset)
-    level_sets = list(level_sets)
-    level_sets.sort()
-    level = config.get('levels', {}).get(levelset, 0)
+    if levelset not in packs:
+        levelset = 'original' if 'original' in packs else names[0]
 
     from . import game, sounds
+    from .menu import select_level
     game.clever_bears = config.get('cleverbears', False)
     sounds.mute = config.get('mute', sounds.mute)
 
     while True:
-        try:
-            game.levels = load_levels(levelset)
-        except:
-            import traceback
-            traceback.print_exc()
-            li = level_sets.index(levelset)
-            del level_sets[li]
-            levelset = level_sets[li % len(level_sets)]
-        else:
-            while level < len(game.levels):
-                try:
-                    levels[levelset] = level
-                    save()
-                    game.play_level(level)
-                except game.SelectLevel as selected:
-                    if 0 <= selected.level < len(game.levels):
-                        level = selected.level
-                except game.ChangeLevelSet:
-                    selected = select_levelset()
-                    if selected != levelset:
-                        try:
-                            newlevels = load_levels(selected)
-                        except:
-                            import traceback
-                            traceback.print_exc()
-                            level_sets.remove(selected)
-                        else:
-                            levelset = selected
-                            level = levels.get(levelset, 0)
-                            game.levels = newlevels
-                else:
-                    level += 1
-            levelset = level_sets[(level_sets.index(levelset) + 1) % len(level_sets)]
-            level = 0
+        levelset, level = select_level(screen, skin, packs, levelset, levels)
+        while True:
+            game.levels = packs[levelset]
+            levels[levelset] = level
+            save()
+            try:
+                game.play_level(level)
+            except game.SelectLevel as selected:
+                if 0 <= selected.level < len(game.levels):
+                    level = selected.level
+            except game.ChangeLevelSet:
+                break
+            else:
+                level += 1
+                if level == len(game.levels):
+                    levelset = names[(names.index(levelset) + 1) % len(names)]
+                    level = 0

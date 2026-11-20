@@ -76,7 +76,7 @@ class SelectLevel(Exception):
 
 
 class ChangeLevelSet(Exception):
-    """Load levels exception"""
+    """Leave the current board and open the level menu."""
     pass
 
 
@@ -188,6 +188,8 @@ def play_level(level):
                             status.refresh()
                             status.update()
                             screen.set_clip(screen_rect)
+                    elif event.key == pygame.K_ESCAPE:
+                        raise ChangeLevelSet()
                     elif event.key == K_l and mods & KMOD_CTRL and not mods & (KMOD_ALT | KMOD_META):
                         draw_sprites()
                         if mods & KMOD_SHIFT:

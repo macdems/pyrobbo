@@ -12,7 +12,8 @@
 # GNU General Public License for more details.
 import os
 import re
-from pkg_resources import resource_string
+import sys
+from pkg_resources import resource_exists, resource_listdir, resource_string
 
 from .defs import DATA_DIRS
 
@@ -39,13 +40,19 @@ def load_levels(name='original'):
     levels = []
     for data_dir in DATA_DIRS:
         try:
-            source = open(os.path.join(data_dir, 'levels', name + '.dat')).read()
+            with open(os.path.join(data_dir, 'levels', name + '.dat')) as infile:
+                source = infile.read()
         except FileNotFoundError:
             continue
         else:
             break
     else:
-        source = resource_string('robbo', 'levels/'+name+'.dat').decode('utf8')
+        resource = 'levels/' + name + '.dat'
+        if resource_exists('robbo', resource):
+            source = resource_string('robbo', resource).decode('utf8')
+        else:
+            with open(name + '.dat') as infile:
+                source = infile.read()
     level = {}
     section = None
     data = ''
@@ -95,3 +102,25 @@ def load_levels(name='original'):
         except Exception as err:
             raise type(err)("line {}: {}".format(lineno, str(err)))
     return levels
+
+
+def load_level_sets():
+    """Collect playable sets in the order used by the menu and by level progression."""
+    files = set(resource_listdir('robbo', 'levels'))
+    for directory in [os.path.join(root, 'levels') for root in DATA_DIRS] + ['.']:
+        try:
+            files.update(os.listdir(directory))
+        except FileNotFoundError:
+            continue
+
+    sets = {}
+    for name in sorted(filename[:-4] for filename in files if filename.endswith('.dat')):
+        try:
+            boards = load_levels(name)
+            if not boards or any(not board.get('data') for board in boards):
+                raise ValueError('missing level data')
+        except (OSError, ValueError, KeyError, IndexError) as err:
+            print("Skipping level set {}: {}".format(name, err), file=sys.stderr)
+        else:
+            sets[name] = boards
+    return sets
