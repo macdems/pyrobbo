@@ -121,10 +121,9 @@ def main():
     if not packs:
         pygame.quit()
         parser.exit(1, "No playable level sets found.\n")
-    names = list(packs)
     levelset = config.get('levelset', levelset)
     if levelset not in packs:
-        levelset = 'original' if 'original' in packs else names[0]
+        levelset = 'original' if 'original' in packs else next(iter(packs))
 
     from . import game, sounds
     from .menu import select_level
@@ -133,6 +132,7 @@ def main():
 
     while True:
         levelset, level = select_level(screen, skins, packs, levelset, levels)
+        names = sorted(packs)
         while True:
             game.levels = packs[levelset]
             levels[levelset] = level

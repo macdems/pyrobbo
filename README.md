@@ -73,6 +73,37 @@ up or down to look ahead on a tall board.
 
 ## Make a level set
 
+Choose a set and level in the front menu, then click **Level editor** or press
+**E**. The editor opens that board. Click the set name to open another set,
+or choose **New set** to start with a room containing Robbo, a screw, and an
+escape capsule.
+
+![Editing a board with the tile palette alongside the map][editor]
+
+| To | In the editor |
+| --- | --- |
+| Paint or erase | Left-drag to paint a tile. Right-drag to erase. |
+| Pick a tile and its settings | Middle-click it on the board. |
+| Scroll | Use the mouse wheel, arrow keys, or buttons below the map. |
+| Configure a tile | Change **Tile options**, then paint. |
+| Manage levels | Use **+ Level**, **Copy**, or **Remove**. |
+| Reorder or resize | Set the position or dimensions in **Board settings**. |
+| Undo an edit | Click **Undo** or press **Ctrl+Z**. |
+
+Switch boards with the arrows beside the level number. In a dialog, use
+**Tab** to move between fields and **Enter** to apply your changes.
+
+For a teleport pair, paint two teleports with the same link group. The editor
+assigns their endpoints automatically. Board settings also let you change the
+background colour, author, and required screw count.
+
+**Save** or **Ctrl+S** writes the whole set to your user level directory.
+Saving edits to a bundled set creates a personal copy that takes precedence
+in the game. Use **Save as** to give a copy its own entry in the menu. To play
+the edited board, choose **Done** and then **Start Level**.
+
+### Edit the text format
+
 A level set is a plain-text `.dat` file. To try a one-room puzzle, save this as
 `first-orbit.dat`.
 
@@ -113,6 +144,7 @@ come from [GNU Robbo][gnu-robbo].
 PyRobbo is free software under the [GNU General Public License][license],
 version 3 or later.
 
+[editor]: docs/images/level-editor.png
 [first-planet]: docs/images/original-level-01.png
 [pypi]: https://pypi.org/project/PyRobbo/
 [level-files]: robbo/levels/

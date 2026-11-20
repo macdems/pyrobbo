@@ -12,11 +12,12 @@ MUTED = (169, 183, 190)
 GOLD = (255, 199, 87)
 
 ROWS = tuple(pygame.Rect(36, y, 300, 40) for y in (144, 217, 290))
-START = pygame.Rect(36, 348, 300, 44)
+START = pygame.Rect(36, 348, 164, 44)
+EDIT = pygame.Rect(208, 348, 128, 44)
 PREVIEW = pygame.Rect(366, 118, 238, 274)
 
 
-def preview_tiles(skin):
+def preview_tiles(skin, size=8):
     """Use the registered sprites' still images without spawning any game objects."""
     from .game import Board
 
@@ -27,7 +28,7 @@ def preview_tiles(skin):
         icon = frames[0] if frames else getattr(sprite, 'IMAGE', None)
         if icon is not None:
             icons[symbol] = icon
-    return {symbol: pygame.transform.smoothscale(skin.get_icon(icon), (8, 8))
+    return {symbol: pygame.transform.smoothscale(skin.get_icon(icon), (size, size))
             for symbol, icon in icons.items()}
 
 
@@ -55,7 +56,7 @@ class LevelMenu:
         self.page = pygame.Surface((640, 480)).convert()
         self.viewport = self.page.get_rect().fit(screen.get_rect())
         self.packs = packs
-        self.names = list(packs)
+        self.names = sorted(packs)
         self.name = name
         self.positions = {}
         for name, boards in packs.items():
@@ -64,6 +65,7 @@ class LevelMenu:
                 index = 0
             self.positions[name] = max(0, min(index, len(boards) - 1))
         self.row = 0
+        self.notice = None
         self.skins = skins
         self.small = pygame.font.Font(None, 22)
         self.large = pygame.font.Font(None, 36)
@@ -80,6 +82,7 @@ class LevelMenu:
         self.row = (self.row + step) % len(ROWS)
 
     def change(self, step):
+        self.notice = None
         if self.row == 0:
             self.name = self.names[(self.names.index(self.name) + step) % len(self.names)]
         elif self.row == 1:
@@ -127,12 +130,19 @@ class LevelMenu:
         pygame.draw.rect(screen, GOLD, START)
         text = self.large.render('Start Level', True, BACKGROUND)
         screen.blit(text, text.get_rect(center=START.center))
+        pygame.draw.rect(screen, PANEL, EDIT)
+        pygame.draw.rect(screen, EDGE, EDIT, 1)
+        text = self.small.render('Level editor  [E]', True, TEXT)
+        screen.blit(text, text.get_rect(center=EDIT.center))
         pygame.draw.line(screen, EDGE, (36, 420), (604, 420))
-        for x, key, action in ((36, 'UP/DOWN', 'Select'), (184, 'LEFT/RIGHT', 'Change'),
-                               (361, 'ENTER', 'Start'), (495, 'ESC', 'Quit')):
-            key_text = self.small.render(key, True, TEXT)
-            screen.blit(key_text, (x, 441))
-            screen.blit(self.small.render(action, True, MUTED), (x + key_text.get_width() + 6, 441))
+        if self.notice:
+            screen.blit(self.small.render(self.notice, True, GOLD), (36, 441))
+        else:
+            for x, key, action in ((36, 'UP/DOWN', 'Select'), (184, 'LEFT/RIGHT', 'Change'),
+                                   (361, 'ENTER', 'Start'), (495, 'ESC', 'Quit')):
+                key_text = self.small.render(key, True, TEXT)
+                screen.blit(key_text, (x, 441))
+                screen.blit(self.small.render(action, True, MUTED), (x + key_text.get_width() + 6, 441))
         self.screen.fill(BACKGROUND)
         page = self.page
         if page.get_size() != self.viewport.size:
@@ -140,12 +150,29 @@ class LevelMenu:
         self.screen.blit(page, self.viewport)
         pygame.display.flip()
 
+    def edit(self):
+        from .editor import LevelEditor
+        try:
+            editor = LevelEditor(self.screen, self.packs, self.name, self.positions[self.name])
+        except (OSError, ValueError, IndexError, KeyError) as err:
+            self.notice = 'Cannot open set: {}'.format(err)
+            return
+        self.notice = None
+        self.name, index = editor.run()
+        self.positions[self.name] = index
+        self.names = sorted(self.packs)
+        for name in self.names:
+            self.positions[name] = min(self.positions.get(name, 0), len(self.packs[name]) - 1)
+
     def click(self, pos):
         x, y = pos
         pos = ((x - self.viewport.x) * self.page.get_width() // self.viewport.width,
                (y - self.viewport.y) * self.page.get_height() // self.viewport.height)
         if START.collidepoint(pos):
             return True
+        if EDIT.collidepoint(pos):
+            self.edit()
+            return False
         for i, rect in enumerate(ROWS):
             if rect.collidepoint(pos):
                 self.row = i
@@ -184,6 +211,8 @@ def select_level(screen, skins, packs, name, saved):
                 menu.change(-1)
             elif event.key in (pygame.K_RIGHT, pygame.K_d):
                 menu.change(1)
+            elif event.key == pygame.K_e:
+                menu.edit()
             elif event.key == pygame.K_f:
                 flags = main.FLAGS_WINDOW if screen.get_flags() & pygame.FULLSCREEN else main.FLAGS_FULLSCREEN
                 main.screen = screen = pygame.display.set_mode((640, 480), flags)

@@ -36,23 +36,34 @@ def trans(i):
             return i
 
 
-def load_levels(name='original'):
-    levels = []
+def read_local_source(path):
+    try:
+        with open(path, encoding='utf-8-sig') as infile:
+            return infile.read()
+    except UnicodeDecodeError:
+        # Older local packs may be in the platform's default encoding.
+        with open(path) as infile:
+            return infile.read()
+
+
+def read_level_source(name):
     for data_dir in DATA_DIRS:
         try:
-            with open(os.path.join(data_dir, 'levels', name + '.dat')) as infile:
-                source = infile.read()
+            return read_local_source(os.path.join(data_dir, 'levels', name + '.dat'))
         except FileNotFoundError:
             continue
-        else:
-            break
-    else:
-        resource = 'levels/' + name + '.dat'
-        if resource_exists('robbo', resource):
-            source = resource_string('robbo', resource).decode('utf8')
-        else:
-            with open(name + '.dat') as infile:
-                source = infile.read()
+    resource = 'levels/' + name + '.dat'
+    if resource_exists('robbo', resource):
+        return resource_string('robbo', resource).decode('utf8')
+    return read_local_source(name + '.dat')
+
+
+def load_levels(name='original'):
+    return parse_levels(read_level_source(name))
+
+
+def parse_levels(source):
+    levels = []
     level = {}
     section = None
     data = ''
@@ -74,7 +85,12 @@ def load_levels(name='original'):
                             data = item.split('.')
                             p = tuple(int(n) for n in data[:2])
                             t = data[2]
-                            data = tuple(int(n) for n in data[3:])
+                            args = data[3:]
+                            # Compact packs can use letters for teleport groups.
+                            if t == '&' and args and args[0].isalpha():
+                                data = (args[0], *(int(n) for n in args[1:]))
+                            else:
+                                data = tuple(int(n) for n in args)
                             additional.setdefault(t, {})[p] = data
                     else:
                         rows = []
