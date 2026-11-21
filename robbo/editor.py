@@ -1,4 +1,15 @@
-"""Mouse-driven level editor using the game's logical display and current skin."""
+# coding: utf8
+# Copyright (C) 2026 Maciej Dems <maciej.dems@p.lodz.pl>
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of GNU General Public License as published by the
+# Free Software Foundation; either version 3 of the license, or (at your
+# opinion) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 from collections import deque
 from copy import deepcopy
 import re
@@ -7,8 +18,7 @@ import pygame
 
 import robbo as main
 from . import images
-from .level_document import Level, LevelSet, check_name
-from .levels import read_level_source
+from .levels import Level, LevelSet, check_name, read_level_source
 from .menu import BACKGROUND, EDGE, GOLD, MUTED, PANEL, TEXT, preview_tiles
 
 CELL = 24
